@@ -1,18 +1,17 @@
-#include "kwargs/kwargs.h"
+#include "cla/cla.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 
-const char * get_basename (const Kwargs * kwargs);
-const char * get_input_filename (const Kwargs * kwargs);
-size_t get_nsamples (const Kwargs * kwargs);
-const char * get_output_filename (const Kwargs * kwargs);
-bool get_verbose (const Kwargs * kwargs);
-void show_usage (void);
+static const char * get_basename (const struct cla * cla);
+static const char * get_input_filename (const struct cla * cla);
+static size_t get_nsamples (const struct cla * cla);
+static const char * get_output_filename (const struct cla * cla);
+static bool get_verbose (const struct cla * cla);
 
 
-const char * get_basename (const Kwargs * kwargs) {
-    const char * s = kwargs_get_optional_value("--basename", kwargs);
+static const char * get_basename (const struct cla * cla) {
+    const char * s = CLA_get_optional_value(cla, "--basename");
     if (s == nullptr) {
         return "sample.";
     }
@@ -20,99 +19,58 @@ const char * get_basename (const Kwargs * kwargs) {
 }
 
 
-const char * get_input_filename (const Kwargs * kwargs) {
-    return kwargs_get_positional_value(0, kwargs);
+static const char * get_input_filename (const struct cla * cla) {
+    return CLA_get_positional_value(cla, 0);
 }
 
 
-size_t get_nsamples (const Kwargs * kwargs) {
-    const char * s = kwargs_get_required_value("--nsamples", kwargs);
+static size_t get_nsamples (const struct cla * cla) {
+    const char * s = CLA_get_required_value(cla, "--nsamples");
     size_t nsamples;
     sscanf(s, " %zu", &nsamples);
     return nsamples;
 }
 
 
-const char * get_output_filename (const Kwargs * kwargs) {
-    return kwargs_get_positional_value(1, kwargs);
+static const char * get_output_filename (const struct cla * cla) {
+    return CLA_get_positional_value(cla, 1);
 }
 
 
-bool get_verbose (const Kwargs * kwargs) {
-    return kwargs_has_flag("--verbose", kwargs) > 0;
+static bool get_verbose (const struct cla * cla) {
+    return CLA_has_flag(cla, "--verbose");
 }
 
 
-int main (const int argc, const char * argv[]) {
-    const KwargsClass classes[] = {
-        {
-            .longname = "--nsamples",
-            .shortname = "-n",
-            .type = KWARGS_REQUIRED
-        },
-        {
-            .longname = "--basename",
-            .shortname = "-b",
-            .type = KWARGS_OPTIONAL
-        },
-        {
-            .longname = "--verbose",
-            .shortname = "-v",
-            .type = KWARGS_FLAG
-        }
-    };
+int main (int argc, const char * argv[]) {
+    // create the kwargs object
+    struct cla * cla = CLA_create();
 
-    const size_t nclasses = sizeof(classes) / sizeof(classes[0]);
-    const size_t npositionals = 2;
-    const Kwargs * kwargs = kwargs_create(argc, argv, nclasses, &classes[0], npositionals);
-    if (kwargs_requires_help(kwargs)) {
-        show_usage();
-        kwargs_destroy((Kwargs **) &kwargs);
-        exit(EXIT_SUCCESS);
-    }
-    const size_t nsamples = get_nsamples(kwargs);
-    const char * basename = get_basename(kwargs);
-    const bool verbose = get_verbose(kwargs);
-    const char * input_filename = get_input_filename(kwargs);
-    const char * output_filename = get_output_filename(kwargs);
-    fprintf(stdout,
-        "Example program that does nothing except demonstrate the use of the libkwargs "
-        "library.\n"
-        "    nsamples = %zu\n"
-        "    basename = \"%s\"\n"
-        "    verbose = %s\n"
-        "    input_filename = \"%s\"\n"
-        "    output_filename = \"%s\"\n",
-        nsamples, basename, verbose ? "true" : "false", input_filename, output_filename);
+    // add various types of allowed arguments
+    CLA_add_required(cla, "--nsamples", "-s");
+    CLA_add_optional(cla, "--basename", "-b");
+    CLA_add_flag(cla, "--verbose", "-v");
+    CLA_add_positionals(cla, 2);
+
+    // parse the arguments that the user actually chose to use
+    CLA_parse(cla, argc, argv);
+
+    // retrieve values
+    const char * basename = get_basename(cla);
+    const size_t nsamples = get_nsamples(cla);
+    const bool verbose = get_verbose(cla);
+    const char * input_filename = get_input_filename(cla);
+    const char * output_filename = get_output_filename(cla);
+
+    fprintf(stdout, "basename = %s\n", basename);
+    fprintf(stdout, "nsamples = %zu\n", nsamples);
+    fprintf(stdout, "verbose%sused\n", verbose ? " " : " not ");
+    fprintf(stdout, "input filename = %s\n", input_filename);
+    fprintf(stdout, "output filename = %s\n", output_filename);
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
     return EXIT_SUCCESS;
-}
-
-
-void show_usage (void) {
-    fprintf(stdout,
-        "  Usage:\n"
-        "    example_kwargs -h\n"
-        "    example_kwargs --help\n"
-        "    example_kwargs [OPTIONALS] REQUIREDS POSITIONALS\n"
-        "\n"
-        "  Synopsis\n"
-        "    Example program that does nothing except demonstrate the\n"
-        "    use of the libkwargs library by printing the values of\n"
-        "    its command line arguments.\n"
-        "\n"
-        "  Requireds\n"
-        "    -n, --nsamples SAMPLES      The number of samples. SAMPLES should be a\n"
-        "                                positive integer.\n"
-        "\n"
-        "  Optionals\n"
-        "    -b, --basename BASENAME     Value of the basename. Default value of\n"
-        "                                BASENAME is \"sample.\"\n"
-        "    -h, --help                  Show the help.\n"
-        "    -v, --verbose               Verbose output.\n"
-        "\n"
-        "  Positionals (by order)\n"
-        "    INPUT_FILENAME              The filepath to the input file.\n"
-        "    OUTPUT_FILENAME             The filepath to the output file. Any\n"
-        "                                directories must exist before running the\n"
-        "                                command.\n");
 }

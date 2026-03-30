@@ -17,24 +17,24 @@ elseif(UNIX)
     list(APPEND CMAKE_INSTALL_RPATH $ORIGIN/../lib)
 endif()
 
-add_library(tgt_lib_kwargs SHARED)
+add_library(tgt_lib_cla SHARED)
 
-set_property(TARGET tgt_lib_kwargs PROPERTY OUTPUT_NAME kwargs)
+set_property(TARGET tgt_lib_cla PROPERTY OUTPUT_NAME cla)
 
 target_compile_definitions(
-    tgt_lib_kwargs
+    tgt_lib_cla
     PRIVATE
         $<$<CONFIG:Debug>:DEBUG>
 )
 
 target_compile_features(
-    tgt_lib_kwargs
+    tgt_lib_cla
     PRIVATE
         c_std_23
 )
 
 target_compile_options(
-    tgt_lib_kwargs
+    tgt_lib_cla
     PRIVATE
         -Wall
         -Wextra
@@ -45,26 +45,25 @@ target_compile_options(
 )
 
 target_include_directories(
-    tgt_lib_kwargs
+    tgt_lib_cla
     PRIVATE
         ${PROJECT_ROOT}/include
 )
 
 target_sources(
-    tgt_lib_kwargs
+    tgt_lib_cla
     PRIVATE
-        ${PROJECT_ROOT}/src/kwargs/kwargs.c
-        ${PROJECT_ROOT}/src/kwargs/protected.c
+        ${PROJECT_ROOT}/src/cla/cla.c
     PUBLIC
-        FILE_SET fset_lib_kwargs_headers
+        FILE_SET fset_lib_cla_headers
         TYPE HEADERS
         BASE_DIRS
             ${PROJECT_ROOT}/include
         FILES
-            ${PROJECT_ROOT}/include/kwargs/kwargs.h
+            ${PROJECT_ROOT}/include/cla/cla.h
 )
 
-install(TARGETS tgt_lib_kwargs
+install(TARGETS tgt_lib_cla
     LIBRARY
-    FILE_SET fset_lib_kwargs_headers
+    FILE_SET fset_lib_cla_headers
 )
