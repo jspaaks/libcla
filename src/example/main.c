@@ -7,7 +7,7 @@ static const char * get_basename (const struct cla * cla);
 static const char * get_input_filename (const struct cla * cla);
 static size_t get_nsamples (const struct cla * cla);
 static const char * get_output_filename (const struct cla * cla);
-static bool get_verbose (const struct cla * cla);
+static int get_verbose (const struct cla * cla);
 
 
 static const char * get_basename (const struct cla * cla) {
@@ -37,8 +37,8 @@ static const char * get_output_filename (const struct cla * cla) {
 }
 
 
-static bool get_verbose (const struct cla * cla) {
-    return CLA_has_flag(cla, "--verbose");
+static int get_verbose (const struct cla * cla) {
+    return CLA_count_flag(cla, "--verbose");
 }
 
 
@@ -58,13 +58,13 @@ int main (int argc, const char * argv[]) {
     // retrieve values
     const char * basename = get_basename(cla);
     const size_t nsamples = get_nsamples(cla);
-    const bool verbose = get_verbose(cla);
+    const int verbose_count = get_verbose(cla);
     const char * input_filename = get_input_filename(cla);
     const char * output_filename = get_output_filename(cla);
 
     fprintf(stdout, "basename = %s\n", basename);
     fprintf(stdout, "nsamples = %zu\n", nsamples);
-    fprintf(stdout, "verbose%sused\n", verbose ? " " : " not ");
+    fprintf(stdout, "verbose used %d times\n", verbose_count);
     fprintf(stdout, "input filename = %s\n", input_filename);
     fprintf(stdout, "output filename = %s\n", output_filename);
 

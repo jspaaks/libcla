@@ -245,6 +245,32 @@ void CLA_add_required (struct cla * self, const char * longname, const char * sh
 }
 
 
+int CLA_count_flag (const struct cla * self, const char * name) {
+    if (self->isfinal == false) {
+        fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(stderr, "// TODO: review logic\n");
+
+    for (struct token * token = &self->tokens.items[0];
+         token < &self->tokens.items[self->tokens.len];
+         token++) {
+
+        if (token->type != TOKEN_TYPE_FLAG) continue;
+
+        struct key * key = &self->keys.items[token->ikey];
+        bool token_str_matches_key_shortname = key->shortname != nullptr && strcmp(token->str, key->shortname) == 0;
+        bool token_str_matches_key_longname = key->longname != nullptr && strcmp(token->str, key->longname) == 0;
+
+        if (token_str_matches_key_shortname || token_str_matches_key_longname) {
+            return key->noccurrences;
+        }
+    }
+    return 0;
+}
+
+
 struct cla * CLA_create (void) {
     fprintf(stderr, "// TODO: memory growing when adding more than 10 keys\n");
 
@@ -325,32 +351,6 @@ const char * CLA_get_required_value (const struct cla * self, const char * name)
         exit(EXIT_FAILURE);
     }
     return value;
-}
-
-
-bool CLA_has_flag (const struct cla * self, const char * name) {
-    if (self->isfinal == false) {
-        fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    fprintf(stderr, "// TODO: review logic\n");
-
-    for (struct token * token = &self->tokens.items[0];
-         token < &self->tokens.items[self->tokens.len];
-         token++) {
-
-        if (token->type != TOKEN_TYPE_FLAG) continue;
-
-        struct key * key = &self->keys.items[token->ikey];
-        bool token_str_matches_key_shortname = key->shortname != nullptr && strcmp(token->str, key->shortname) == 0;
-        bool token_str_matches_key_longname = key->longname != nullptr && strcmp(token->str, key->longname) == 0;
-
-        if (token_str_matches_key_shortname || token_str_matches_key_longname) {
-            return true;
-        }
-    }
-    return false;
 }
 
 
@@ -464,4 +464,9 @@ static int find_key_by_name (const struct cla * self, const char * name) {
         if (a || b) return ikey;
     }
     return -1;
+}
+
+
+bool CLA_has_flag (const struct cla * self, const char * name) {
+    return CLA_count_flag(self, name) > 0;
 }
