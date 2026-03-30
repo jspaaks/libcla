@@ -79,7 +79,7 @@ static void add_key (struct cla * self, const char * longname, const char * shor
     assert_longname_isnt_duplicate(self, longname);
 
     if (self->keys.len >= self->keys.cap) {
-        fprintf(stderr, "Can't add any more keys, aborting.\n");
+        fprintf(stderr, "ERROR: Can't add any more keys, aborting.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -163,13 +163,17 @@ static void assert_required_keys_are_present (const struct cla * self) {
         }
         if (found == false) {
             if (key->longname != nullptr && key->shortname != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s/%s' not found, aborting.\n", key->shortname, key->longname);
+                fprintf(stderr, "ERROR: Required key '%s/%s' not found%s, aborting.\n",
+                        key->shortname, key->longname,
+                        self->npositionals > 0 ? " or not all positionals have been defined" : "");
                 exit(EXIT_FAILURE);
             } else if (key->longname != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s' not found, aborting.\n", key->longname);
+                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->longname,
+                        self->npositionals > 0 ? " or not all positionals have been defined" : "");
                 exit(EXIT_FAILURE);
             } else {
-                fprintf(stderr, "ERROR: Required key '%s' not found, aborting.\n", key->shortname);
+                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->shortname,
+                        self->npositionals > 0 ? " or not all positionals have been defined" : "");
                 exit(EXIT_FAILURE);
             }
         }
@@ -277,7 +281,7 @@ struct cla * CLA_create (void) {
     errno = 0;
     struct cla * self = calloc(1, sizeof(struct cla));
     if (self == nullptr) {
-        fprintf(stderr, "%s\nError allocating memory for instance of \"struct cla\", aborting.\n", strerror(errno));
+        fprintf(stderr, "%s\nERROR: Could not allocate memory for instance of \"struct cla\", aborting.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -289,7 +293,7 @@ struct cla * CLA_create (void) {
         .len = 0,
     };
     if (self->keys.items == nullptr) {
-        fprintf(stderr, "%s\nError allocating memory for keys array, aborting.\n", strerror(errno));
+        fprintf(stderr, "%s\nERROR: Could not allocate memory for keys array, aborting.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -332,11 +336,11 @@ const char * CLA_get_optional_value (const struct cla * self, const char * name)
 
 const char * CLA_get_positional_value (const struct cla * self, int ipos) {
     if (ipos < 0) {
-        fprintf(stderr, "Can't use a negative index to retrieve a positional argument, aborting\n");
+        fprintf(stderr, "ERROR: Can't use a negative index to retrieve a positional argument, aborting.\n");
         exit(EXIT_FAILURE);
     }
-    if (ipos > self->npositionals - 1) {
-        fprintf(stderr, "There are only %d positional arguments, aborting\n", self->npositionals);
+    if (ipos >= self->npositionals) {
+        fprintf(stderr, "ERROR: Requested positional argument does not exist, aborting.\n");
         exit(EXIT_FAILURE);
     }
     int i = self->tokens.len - self->npositionals + ipos;
@@ -363,7 +367,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
         .len = argc,
     };
     if (self->tokens.items == nullptr) {
-        fprintf(stderr, "%s\nError allocating memory for token array, aborting.\n", strerror(errno));
+        fprintf(stderr, "%s\nERROR: Could not allocate memory for token array, aborting.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -385,7 +389,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
     // iterate over the non-positionals: flags, requireds, optionals
     int ipos0 = argc - self->npositionals;
     if (ipos0 < 1) {
-        fprintf(stderr, "ERROR: Expected more arguments, aborting.\n");
+        fprintf(stderr, "ERROR: Expected at least %d positional arguments, aborting.\n", self->npositionals);
         exit(EXIT_FAILURE);
     }
     for (int itoken = 1; itoken < ipos0; itoken++) {
@@ -405,7 +409,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
         // token's str, assign key->type to token->type
         int ikey = find_key_by_name(self, token->str);
         if (ikey == -1) {
-            fprintf(stderr, "Found unknown option '%s', aborting.\n", self->tokens.items[itoken].str);
+            fprintf(stderr, "ERROR: Found unknown option '%s', aborting.\n", self->tokens.items[itoken].str);
             exit(EXIT_FAILURE);
         }
         token->type = (enum token_type) self->keys.items[ikey].type;
@@ -416,7 +420,8 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 
         if (itoken == ipos0 - 1) {
             if (token->type == TOKEN_TYPE_REQUIRED || token->type == TOKEN_TYPE_OPTIONAL) {
-                fprintf(stderr, "ERROR: '%s' requires a value but none given, aborting.\n", token->str);
+                fprintf(stderr, "ERROR: '%s' requires a value but none given%s, aborting.\n",
+                        token->str, self->npositionals > 0 ? " or not all positionals have been defined" : "");
                 exit(EXIT_FAILURE);
             }
         }
