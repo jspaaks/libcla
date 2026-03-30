@@ -61,11 +61,10 @@ static void add_key (struct cla * cla, const char * longname, const char * short
 static void assert_is_named (const char * longname, const char * shortname);
 static void assert_longname_is_compliant (const char * longname);
 static void assert_longname_isnt_duplicate (const struct cla * self, const char * longname);
-static void assert_optional_token_not_repeated (struct cla * self);
 static void assert_required_keys_are_present (const struct cla * self);
-static void assert_required_token_not_repeated (struct cla * self);
 static void assert_shortname_is_compliant (const char * shortname);
 static void assert_shortname_isnt_duplicate (const struct cla * self, const char * shortname);
+static void assert_token_not_repeated (struct cla * self, enum key_type type);
 static int find_key_by_name (const struct cla * self, const char * name);
 
 
@@ -140,11 +139,6 @@ static void assert_longname_isnt_duplicate (const struct cla * self, const char 
 }
 
 
-static void assert_optional_token_not_repeated (struct cla * self) {
-    fprintf(stderr, "// TODO: implement assert_optional_token_not_repeated\n");
-}
-
-
 static void assert_required_keys_are_present (const struct cla * self) {
     for (struct key * key = &self->keys.items[0];
         key < &self->keys.items[self->keys.len];
@@ -183,10 +177,6 @@ static void assert_required_keys_are_present (const struct cla * self) {
 }
 
 
-static void assert_required_token_not_repeated (struct cla * self) {
-    fprintf(stderr, "// TODO: implement assert_required_token_not_repeated\n");
-}
-
 static void assert_shortname_is_compliant (const char * shortname) {
     if (shortname == nullptr) return;
     if (strnlen(shortname, 3) != 2) {
@@ -210,6 +200,25 @@ static void assert_shortname_isnt_duplicate (const struct cla * self, const char
     for (int i = 0; i < self->keys.len; i++) {
         if (strcmp(self->keys.items[i].shortname, shortname) == 0) {
             fprintf(stderr, "ERROR: shortname \"%s\" already exists, aborting.\n", shortname);
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+
+static void assert_token_not_repeated (struct cla * self, enum key_type type) {
+    for (struct key * key = &self->keys.items[0];
+         key < &self->keys.items[self->keys.len];
+         key++) {
+
+        if (key->type == type && key->noccurrences > 1) {
+            if (key->longname != nullptr && key->shortname != nullptr) {
+                fprintf(stderr, "ERROR: Found multiple usages of key '%s/%s', aborting.\n", key->shortname, key->longname);
+            } else if (key->longname != nullptr) {
+                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->longname);
+            } else {
+                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->shortname);
+            }
             exit(EXIT_FAILURE);
         }
     }
@@ -345,25 +354,6 @@ bool CLA_has_flag (const struct cla * self, const char * name) {
 }
 
 
-void CLA_print_parse_result (const struct cla * self) {
-    const char * typenames[] = {
-        [TOKEN_TYPE_ERR] = "error",
-        [TOKEN_TYPE_REQUIRED] = "required",
-        [TOKEN_TYPE_OPTIONAL] = "optional",
-        [TOKEN_TYPE_FLAG] = "flag",
-        [TOKEN_TYPE_POSITIONAL] = "positional",
-        [TOKEN_TYPE_EXENAME] = "exename",
-        [TOKEN_TYPE_VALUE] = "value",
-    };
-    fprintf(stdout, "Command line input parsed as:\n");
-    for (int itoken = 0; itoken < self->tokens.len; itoken++) {
-        struct token * token = &self->tokens.items[itoken];
-        fprintf(stdout, "%-10s %s\n", typenames[token->type], token->str);
-    }
-    fprintf(stdout, "\n");
-}
-
-
 void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 
     errno = 0;
@@ -421,6 +411,9 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
         token->type = (enum token_type) self->keys.items[ikey].type;
         token->ikey = ikey;
 
+        // keep track of how many times the key was used
+        self->keys.items[ikey].noccurrences++;
+
         if (itoken == ipos0 - 1) {
             if (token->type == TOKEN_TYPE_REQUIRED || token->type == TOKEN_TYPE_OPTIONAL) {
                 fprintf(stderr, "ERROR: '%s' requires a value but none given, aborting.\n", token->str);
@@ -436,11 +429,31 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
     }
 
     assert_required_keys_are_present(self);
-    assert_optional_token_not_repeated(self);
-    assert_required_token_not_repeated(self);
+    assert_token_not_repeated(self, KEY_TYPE_REQUIRED);
+    assert_token_not_repeated(self, KEY_TYPE_OPTIONAL);
 
     self->isfinal = true;
 }
+
+
+void CLA_print_parse_result (const struct cla * self) {
+    const char * typenames[] = {
+        [TOKEN_TYPE_ERR] = "error",
+        [TOKEN_TYPE_REQUIRED] = "required",
+        [TOKEN_TYPE_OPTIONAL] = "optional",
+        [TOKEN_TYPE_FLAG] = "flag",
+        [TOKEN_TYPE_POSITIONAL] = "positional",
+        [TOKEN_TYPE_EXENAME] = "exename",
+        [TOKEN_TYPE_VALUE] = "value",
+    };
+    fprintf(stdout, "Command line input parsed as:\n");
+    for (int itoken = 0; itoken < self->tokens.len; itoken++) {
+        struct token * token = &self->tokens.items[itoken];
+        fprintf(stdout, "%-10s %s\n", typenames[token->type], token->str);
+    }
+    fprintf(stdout, "\n");
+}
+
 
 static int find_key_by_name (const struct cla * self, const char * name) {
     if (name == nullptr) return -1;
@@ -450,5 +463,5 @@ static int find_key_by_name (const struct cla * self, const char * name) {
         bool b = (key->longname != nullptr) && (strcmp(key->longname, name) == 0);
         if (a || b) return ikey;
     }
-    return - 1;
+    return -1;
 }
