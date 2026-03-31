@@ -63,6 +63,7 @@ static void add_key (struct cla * cla, const char * name, const char * alias, en
 static void assert_alias_is_compliant (const char * alias);
 static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias);
 static void assert_arguments_have_been_parsed (const struct cla * self);
+static void assert_arguments_have_not_been_parsed (const struct cla * self);
 static void assert_is_named (const char * name, const char * alias);
 static void assert_key_exists (int ikey, const char * name);
 static void assert_key_is_of_type (const struct cla * self, int ikey, const char * name, enum key_type type);
@@ -74,35 +75,9 @@ static void assert_token_not_repeated (struct cla * self, enum key_type type);
 static int find_key_by_name (const struct cla * self, const char * name);
 
 
-static void assert_alias_is_compliant (const char * alias) {
-    if (alias == nullptr) return;
-    if (strnlen(alias, 3) != 2) {
-        fprintf(stderr, "ERROR: alias \"%s\" should be length 2, aborting.\n", alias);
-        exit(EXIT_FAILURE);
-    }
-    if (alias[0] != '-') {
-        fprintf(stderr, "ERROR: alias \"%s\" should start with \'-\', aborting.\n", alias);
-        exit(EXIT_FAILURE);
-    }
-    if (!isalpha(alias[1])) {
-        fprintf(stderr, "ERROR: alias \"%s\" character at index 1 should\n"
-                        "be [a-zA-Z], aborting.\n", alias);
-        exit(EXIT_FAILURE);
-    }
-}
-
-
-static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias) {
-    if (alias == nullptr) return;
-    if (find_key_by_name(self, alias) != -1) {
-        fprintf(stderr, "ERROR: alias \"%s\" already exists, aborting.\n", alias);
-        exit(EXIT_FAILURE);
-    }
-}
-
-
 static void add_key (struct cla * self, const char * name, const char * alias, enum key_type type) {
 
+    assert_arguments_have_not_been_parsed(self);
     assert_is_named(name, alias);
     assert_alias_is_compliant(alias);
     assert_alias_isnt_duplicate(self, alias);
@@ -159,9 +134,44 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
 }
 
 
+static void assert_alias_is_compliant (const char * alias) {
+    if (alias == nullptr) return;
+    if (strnlen(alias, 3) != 2) {
+        fprintf(stderr, "ERROR: alias \"%s\" should be length 2, aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+    if (alias[0] != '-') {
+        fprintf(stderr, "ERROR: alias \"%s\" should start with \'-\', aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+    if (!isalpha(alias[1])) {
+        fprintf(stderr, "ERROR: alias \"%s\" character at index 1 should\n"
+                        "be [a-zA-Z], aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias) {
+    if (alias == nullptr) return;
+    if (find_key_by_name(self, alias) != -1) {
+        fprintf(stderr, "ERROR: alias \"%s\" already exists, aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 static void assert_arguments_have_been_parsed (const struct cla * self) {
     if (self->isfinal == false) {
         fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void assert_arguments_have_not_been_parsed (const struct cla * self) {
+    if (self->isfinal == true) {
+        fprintf(stderr, "ERROR: arguments have already been parsed, aborting.\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -309,6 +319,7 @@ void CLA_add_optional (struct cla * self, const char * name, const char * alias)
 
 
 void CLA_add_positionals (struct cla * self, int npositionals) {
+    assert_arguments_have_not_been_parsed(self);
     self->npositionals = npositionals;
 }
 
