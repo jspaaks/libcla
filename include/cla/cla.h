@@ -13,11 +13,12 @@ void CLA_add_required (struct cla * self, const char * longname, const char * sh
 int CLA_count_flag (const struct cla * self, const char * name);
 struct cla * CLA_create (void);
 void CLA_destroy (struct cla ** self);
-const char * CLA_get_optional_value (const struct cla * self, const char * name);
-const char * CLA_get_positional_value (const struct cla * self, int ipos);
-const char * CLA_get_required_value (const struct cla * self, const char * name);
+const char * CLA_get_value_optional (const struct cla * self, const char * name);
+const char * CLA_get_value_positional (const struct cla * self, int ipos);
+const char * CLA_get_value_required (const struct cla * self, const char * name);
+bool CLA_has_flag (const struct cla * self, const char * name);
+bool CLA_has_optional (const struct cla * self, const char * name);
 void CLA_parse (struct cla * self, int argc, const char * argv[]);
 void CLA_print_parse_result (const struct cla * self);
-bool CLA_has_flag (const struct cla * self, const char * name);
 
 #endif
