@@ -9,10 +9,11 @@ cla (\fIlibcla\fR, \fI\-lcla\fR)
 \fBstruct cla * CLA_create (void);
 .SH DESCRIPTION
 .B CLA_create
-allocates memory necessary for classifying command line arguments.
+allocates memory necessary for parsing command line arguments into flags, required arguments,
+optional arguments, positional arguments, and values.
 
 .SH RETURN VALUE
-A pointer to the abstract object required for command line argument classification.
+A pointer to the abstract object required for command line argument parsing.
 The user is responsible for freeing the memory allocated by \fBCLA_create\fR using
 \fBCLA_destroy\fR.
 .SH SEE ALSO
