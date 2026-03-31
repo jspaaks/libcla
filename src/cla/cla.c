@@ -319,9 +319,9 @@ void CLA_add_required (struct cla * self, const char * longname, const char * sh
 
 
 int CLA_count_flag (const struct cla * self, const char * name) {
-    assert_arguments_have_been_parsed (self);
+    assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
-    assert_key_exists (ikey, name);
+    assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
     return self->keys.items[ikey].noccurrences;
 }
@@ -387,7 +387,7 @@ void CLA_destroy (struct cla ** self) {
 const char * CLA_get_value_optional (const struct cla * self, const char * name) {
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
-    assert_key_exists (ikey, name);
+    assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
     assert_key_is_used(self, ikey, name);
     for (int itoken = 0; itoken < self->tokens.len; itoken++) {
@@ -417,7 +417,7 @@ const char * CLA_get_value_positional (const struct cla * self, int ipos) {
 const char * CLA_get_value_required (const struct cla * self, const char * name) {
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
-    assert_key_exists (ikey, name);
+    assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_REQUIRED);
     assert_key_is_used(self, ikey, name);
     for (int itoken = 0; itoken < self->tokens.len; itoken++) {
@@ -431,16 +431,16 @@ const char * CLA_get_value_required (const struct cla * self, const char * name)
 
 
 bool CLA_has_flag (const struct cla * self, const char * name) {
-    assert_arguments_have_been_parsed (self);
+    assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
-    assert_key_exists (ikey, name);
+    assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
     return CLA_count_flag(self, name) > 0;
 }
 
 
 bool CLA_has_optional (const struct cla * self, const char * name) {
-    assert_arguments_have_been_parsed (self);
+    assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
     if (ikey == -1) {
         fprintf(stderr, "ERROR: There is no optional argument named '%s', aborting.\n", name);
