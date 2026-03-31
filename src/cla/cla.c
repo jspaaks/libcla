@@ -26,8 +26,8 @@ enum token_type {
 };
 
 struct key {
-    char * longname;
-    char * shortname;
+    char * name;
+    char * alias;
     int noccurrences;
     enum key_type type;
 };
@@ -59,28 +59,55 @@ struct cla {
 };
 
 
-static void add_key (struct cla * cla, const char * longname, const char * shortname, enum key_type type);
+static void add_key (struct cla * cla, const char * name, const char * alias, enum key_type type);
+static void assert_alias_is_compliant (const char * alias);
+static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias);
 static void assert_arguments_have_been_parsed (const struct cla * self);
-static void assert_is_named (const char * longname, const char * shortname);
+static void assert_is_named (const char * name, const char * alias);
 static void assert_key_exists (int ikey, const char * name);
 static void assert_key_is_of_type (const struct cla * self, int ikey, const char * name, enum key_type type);
 static void assert_key_is_used (const struct cla * self, int ikey, const char * name);
-static void assert_longname_is_compliant (const char * longname);
-static void assert_longname_isnt_duplicate (const struct cla * self, const char * longname);
+static void assert_name_is_compliant (const char * name);
+static void assert_name_isnt_duplicate (const struct cla * self, const char * name);
 static void assert_required_keys_are_present (const struct cla * self);
-static void assert_shortname_is_compliant (const char * shortname);
-static void assert_shortname_isnt_duplicate (const struct cla * self, const char * shortname);
 static void assert_token_not_repeated (struct cla * self, enum key_type type);
 static int find_key_by_name (const struct cla * self, const char * name);
 
 
-static void add_key (struct cla * self, const char * longname, const char * shortname, enum key_type type) {
+static void assert_alias_is_compliant (const char * alias) {
+    if (alias == nullptr) return;
+    if (strnlen(alias, 3) != 2) {
+        fprintf(stderr, "ERROR: alias \"%s\" should be length 2, aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+    if (alias[0] != '-') {
+        fprintf(stderr, "ERROR: alias \"%s\" should start with \'-\', aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+    if (!isalpha(alias[1])) {
+        fprintf(stderr, "ERROR: alias \"%s\" character at index 1 should\n"
+                        "be [a-zA-Z], aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+}
 
-    assert_is_named(longname, shortname);
-    assert_shortname_is_compliant(shortname);
-    assert_shortname_isnt_duplicate(self, shortname);
-    assert_longname_is_compliant(longname);
-    assert_longname_isnt_duplicate(self, longname);
+
+static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias) {
+    if (alias == nullptr) return;
+    if (find_key_by_name(self, alias) != -1) {
+        fprintf(stderr, "ERROR: alias \"%s\" already exists, aborting.\n", alias);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void add_key (struct cla * self, const char * name, const char * alias, enum key_type type) {
+
+    assert_is_named(name, alias);
+    assert_alias_is_compliant(alias);
+    assert_alias_isnt_duplicate(self, alias);
+    assert_name_is_compliant(name);
+    assert_name_isnt_duplicate(self, name);
 
     // if the keys.items array is full, double its capacity, and zero-initialize the new positions
     if (self->keys.len >= self->keys.cap) {
@@ -99,32 +126,32 @@ static void add_key (struct cla * self, const char * longname, const char * shor
     // define the struct key that will hold the new key
     int * i = &self->keys.len;
     self->keys.items[*i] = (struct key) {
-        .longname = nullptr,
-        .shortname = nullptr,
+        .name = nullptr,
+        .alias = nullptr,
         .noccurrences = 0,
         .type = type,
     };
 
-    // if the new key has a longname, set some memory aside for it and copy longname into it
-    if (longname != nullptr) {
-        char * tmp = calloc(strlen(longname) + 1, sizeof(char));
+    // if the new key has a name, set some memory aside for it and copy name into it
+    if (name != nullptr) {
+        char * tmp = calloc(strlen(name) + 1, sizeof(char));
         if (tmp == nullptr) {
-            fprintf(stderr, "%s\nERROR: Could not allocate memory for longname %d, aborting.\n", strerror(errno), *i);
+            fprintf(stderr, "%s\nERROR: Could not allocate memory for name %d, aborting.\n", strerror(errno), *i);
             exit(EXIT_FAILURE);
         }
-        self->keys.items[*i].longname = tmp;
-        strcpy(self->keys.items[*i].longname, longname);
+        self->keys.items[*i].name = tmp;
+        strcpy(self->keys.items[*i].name, name);
     }
 
-    // if the new key has a shortname, set some memory aside for it and copy shortname into it
-    if (shortname != nullptr) {
-        char * tmp = calloc(strlen(shortname) + 1, sizeof(char));
+    // if the new key has a alias, set some memory aside for it and copy alias into it
+    if (alias != nullptr) {
+        char * tmp = calloc(strlen(alias) + 1, sizeof(char));
         if (tmp == nullptr) {
-            fprintf(stderr, "%s\nERROR: Could not allocate memory for shortname %d, aborting.\n", strerror(errno), *i);
+            fprintf(stderr, "%s\nERROR: Could not allocate memory for alias %d, aborting.\n", strerror(errno), *i);
             exit(EXIT_FAILURE);
         }
-        self->keys.items[*i].shortname = tmp;
-        strcpy(self->keys.items[*i].shortname, shortname);
+        self->keys.items[*i].alias = tmp;
+        strcpy(self->keys.items[*i].alias, alias);
     }
 
     // increment keys.len
@@ -140,8 +167,8 @@ static void assert_arguments_have_been_parsed (const struct cla * self) {
 }
 
 
-static void assert_is_named (const char * longname, const char * shortname) {
-    if (longname == nullptr && shortname == nullptr) {
+static void assert_is_named (const char * name, const char * alias) {
+    if (name == nullptr && alias == nullptr) {
         fprintf(stderr, "ERROR: Can't add an unnamed option, aborting.\n");
         exit(EXIT_FAILURE);
     }
@@ -177,36 +204,36 @@ static void assert_key_is_used (const struct cla * self, int ikey, const char * 
 }
 
 
-static void assert_longname_is_compliant (const char * longname) {
-    if (longname == nullptr) return;
-    if (strnlen(longname, 4) <= 3) {
-        fprintf(stderr, "ERROR: longname \"%s\" should be at least 4 characters, aborting.\n", longname);
+static void assert_name_is_compliant (const char * name) {
+    if (name == nullptr) return;
+    if (strnlen(name, 4) <= 3) {
+        fprintf(stderr, "ERROR: name \"%s\" should be at least 4 characters, aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    if (strnlen(longname, 65) > 64) {
-        fprintf(stderr, "ERROR: longname \"%s\" should be at most 64 characters, aborting.\n", longname);
+    if (strnlen(name, 65) > 64) {
+        fprintf(stderr, "ERROR: name \"%s\" should be at most 64 characters, aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    if (longname[0] != '-') {
-        fprintf(stderr, "ERROR: longname \"%s\" should start with \"--\", aborting.\n", longname);
+    if (name[0] != '-') {
+        fprintf(stderr, "ERROR: name \"%s\" should start with \"--\", aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    if (longname[1] != '-') {
-        fprintf(stderr, "ERROR: longname \"%s\" should start with \"--\", aborting.\n", longname);
+    if (name[1] != '-') {
+        fprintf(stderr, "ERROR: name \"%s\" should start with \"--\", aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    if (!isalpha(longname[2])) {
-        fprintf(stderr, "ERROR: longname \"%s\" character at index 2 should\n"
-                        "be [a-zA-Z], aborting.\n", longname);
+    if (!isalpha(name[2])) {
+        fprintf(stderr, "ERROR: name \"%s\" character at index 2 should\n"
+                        "be [a-zA-Z], aborting.\n", name);
         exit(EXIT_FAILURE);
     }
 }
 
 
-static void assert_longname_isnt_duplicate (const struct cla * self, const char * longname) {
-    if (longname == nullptr) return;
-    if (find_key_by_name(self, longname) != -1) {
-        fprintf(stderr, "ERROR: longname \"%s\" already exists, aborting.\n", longname);
+static void assert_name_isnt_duplicate (const struct cla * self, const char * name) {
+    if (name == nullptr) return;
+    if (find_key_by_name(self, name) != -1) {
+        fprintf(stderr, "ERROR: name \"%s\" already exists, aborting.\n", name);
         exit(EXIT_FAILURE);
     }
 }
@@ -226,55 +253,28 @@ static void assert_required_keys_are_present (const struct cla * self) {
 
             if (token->type != TOKEN_TYPE_REQUIRED) continue;
 
-            bool token_str_matches_key_shortname = key->shortname != nullptr && strcmp(token->str, key->shortname) == 0;
-            bool token_str_matches_key_longname = key->longname != nullptr && strcmp(token->str, key->longname) == 0;
+            bool token_str_matches_key_alias = key->alias != nullptr && strcmp(token->str, key->alias) == 0;
+            bool token_str_matches_key_name = key->name != nullptr && strcmp(token->str, key->name) == 0;
 
-            if (token_str_matches_key_shortname || token_str_matches_key_longname) {
+            if (token_str_matches_key_alias || token_str_matches_key_name) {
                 found = true;
                 break;
             }
         }
         if (found == false) {
-            if (key->longname != nullptr && key->shortname != nullptr) {
+            if (key->name != nullptr && key->alias != nullptr) {
                 fprintf(stderr, "ERROR: Required key '%s/%s' not found%s, aborting.\n",
-                        key->shortname, key->longname,
+                        key->alias, key->name,
                         self->npositionals > 0 ? " or not all positionals have been defined" : "");
-            } else if (key->longname != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->longname,
+            } else if (key->name != nullptr) {
+                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->name,
                         self->npositionals > 0 ? " or not all positionals have been defined" : "");
             } else {
-                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->shortname,
+                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->alias,
                         self->npositionals > 0 ? " or not all positionals have been defined" : "");
             }
             exit(EXIT_FAILURE);
         }
-    }
-}
-
-
-static void assert_shortname_is_compliant (const char * shortname) {
-    if (shortname == nullptr) return;
-    if (strnlen(shortname, 3) != 2) {
-        fprintf(stderr, "ERROR: shortname \"%s\" should be length 2, aborting.\n", shortname);
-        exit(EXIT_FAILURE);
-    }
-    if (shortname[0] != '-') {
-        fprintf(stderr, "ERROR: shortname \"%s\" should start with \'-\', aborting.\n", shortname);
-        exit(EXIT_FAILURE);
-    }
-    if (!isalpha(shortname[1])) {
-        fprintf(stderr, "ERROR: shortname \"%s\" character at index 1 should\n"
-                        "be [a-zA-Z], aborting.\n", shortname);
-        exit(EXIT_FAILURE);
-    }
-}
-
-
-static void assert_shortname_isnt_duplicate (const struct cla * self, const char * shortname) {
-    if (shortname == nullptr) return;
-    if (find_key_by_name(self, shortname) != -1) {
-        fprintf(stderr, "ERROR: shortname \"%s\" already exists, aborting.\n", shortname);
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -285,12 +285,12 @@ static void assert_token_not_repeated (struct cla * self, enum key_type type) {
          key++) {
 
         if (key->type == type && key->noccurrences > 1) {
-            if (key->longname != nullptr && key->shortname != nullptr) {
-                fprintf(stderr, "ERROR: Found multiple usages of key '%s/%s', aborting.\n", key->shortname, key->longname);
-            } else if (key->longname != nullptr) {
-                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->longname);
+            if (key->name != nullptr && key->alias != nullptr) {
+                fprintf(stderr, "ERROR: Found multiple usages of key '%s/%s', aborting.\n", key->alias, key->name);
+            } else if (key->name != nullptr) {
+                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->name);
             } else {
-                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->shortname);
+                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->alias);
             }
             exit(EXIT_FAILURE);
         }
@@ -298,13 +298,13 @@ static void assert_token_not_repeated (struct cla * self, enum key_type type) {
 }
 
 
-void CLA_add_flag (struct cla * self, const char * longname, const char * shortname) {
-    add_key(self, longname, shortname, KEY_TYPE_FLAG);
+void CLA_add_flag (struct cla * self, const char * name, const char * alias) {
+    add_key(self, name, alias, KEY_TYPE_FLAG);
 }
 
 
-void CLA_add_optional (struct cla * self, const char * longname, const char * shortname) {
-    add_key(self, longname, shortname, KEY_TYPE_OPTIONAL);
+void CLA_add_optional (struct cla * self, const char * name, const char * alias) {
+    add_key(self, name, alias, KEY_TYPE_OPTIONAL);
 }
 
 
@@ -313,8 +313,8 @@ void CLA_add_positionals (struct cla * self, int npositionals) {
 }
 
 
-void CLA_add_required (struct cla * self, const char * longname, const char * shortname) {
-    add_key(self, longname, shortname, KEY_TYPE_REQUIRED);
+void CLA_add_required (struct cla * self, const char * name, const char * alias) {
+    add_key(self, name, alias, KEY_TYPE_REQUIRED);
 }
 
 
@@ -352,16 +352,16 @@ struct cla * CLA_create (void) {
 
 
 void CLA_destroy (struct cla ** self) {
-    // deallocate dynamic memory set aside for storing key.shortname for all keys
+    // deallocate dynamic memory set aside for storing key.alias for all keys
     for (int i = 0; i < (*self)->keys.len; i++) {
-        free((*self)->keys.items[i].shortname);
-        (*self)->keys.items[i].shortname = nullptr;
+        free((*self)->keys.items[i].alias);
+        (*self)->keys.items[i].alias = nullptr;
     }
 
-    // deallocate dynamic memory set aside for storing key.longname for all keys
+    // deallocate dynamic memory set aside for storing key.name for all keys
     for (int i = 0; i < (*self)->keys.len; i++) {
-        free((*self)->keys.items[i].longname);
-        (*self)->keys.items[i].longname = nullptr;
+        free((*self)->keys.items[i].name);
+        (*self)->keys.items[i].name = nullptr;
     }
 
     // deallocate dynamic memory set aside for storing array of keys
@@ -495,7 +495,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
             continue;
         }
 
-        // if there is a key whose longname or shortname matches
+        // if there is a key whose name or alias matches
         // token's str, assign key->type to token->type
         int ikey = find_key_by_name(self, token->str);
         assert_key_exists(ikey, token->str);
@@ -551,8 +551,8 @@ static int find_key_by_name (const struct cla * self, const char * name) {
     if (name == nullptr) return -1;
     for (int ikey = 0; ikey < self->keys.len; ikey++) {
         struct key * key = &self->keys.items[ikey];
-        bool a = (key->shortname != nullptr) && (strcmp(key->shortname, name) == 0);
-        bool b = (key->longname != nullptr) && (strcmp(key->longname, name) == 0);
+        bool a = (key->alias != nullptr) && (strcmp(key->alias, name) == 0);
+        bool b = (key->name != nullptr) && (strcmp(key->name, name) == 0);
         if (a || b) return ikey;
     }
     return -1;
