@@ -50,7 +50,7 @@ struct tokens {
     struct token * items;
 };
 
-// command line arguments
+// implementation of opaque type from the API
 struct cla {
     bool isfinal;
     struct keys keys;
