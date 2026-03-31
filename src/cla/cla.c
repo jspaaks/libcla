@@ -297,7 +297,7 @@ struct cla * CLA_create (void) {
         exit(EXIT_FAILURE);
     }
 
-    int cap = 1;
+    int cap = 8;
     errno = 0;
     self->keys = (struct keys) {
         .cap = cap,
