@@ -6,10 +6,10 @@
 typedef struct cla Cla;
 struct cla;
 
-void CLA_add_flag (struct cla * self, const char * longname, const char * shortname);
-void CLA_add_optional (struct cla * self, const char * longname, const char * shortname);
+void CLA_add_flag (struct cla * self, const char * name, const char * alias);
+void CLA_add_optional (struct cla * self, const char * name, const char * alias);
 void CLA_add_positionals (struct cla * self, int npositionals);
-void CLA_add_required (struct cla * self, const char * longname, const char * shortname);
+void CLA_add_required (struct cla * self, const char * name, const char * alias);
 int CLA_count_flag (const struct cla * self, const char * name);
 struct cla * CLA_create (void);
 void CLA_destroy (struct cla ** self);
