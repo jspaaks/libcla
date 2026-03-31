@@ -1,0 +1,27 @@
+.TH cla 3
+.SH NAME
+cla \- command line argument handling
+.SH LIBRARY
+cla (\fIlibcla\fR, \fI\-lcla\fR)
+
+.SH DESCRIPTION
+Available API man pages:
+
+.TS
+l l.
+\fBCLA_add_flag\fR	Register a flag argument
+\fBCLA_add_optional\fR	Register an optional argument
+\fBCLA_add_positionals\fR	Register the number of positional arguments
+\fBCLA_add_required\fR	Register a required argument
+\fBCLA_count_flag\fR	Count the usages of a flag
+\fBCLA_create\fR	Create memory necessary for argument classification
+\fBCLA_destroy\fR	Free the memory allocated by \fBcla_create\fR
+\fBCLA_get_value_optional\fR	Get the value associated with an optional argument
+\fBCLA_get_value_positional\fR	Get the value associated with a positional argument
+\fBCLA_get_value_required\fR	Get the value associated with a required argument
+\fBCLA_has_flag\fR	Assess whether the command line arguments include a given flag argument
+\fBCLA_has_optional\fR	Assess whether the command line arguments include a given optional argument
+\fBCLA_parse\fR	Parse the command line options
+\fBCLA_print_parse_result\fR	Print how the command line arguments were parsed
+
+.TE
