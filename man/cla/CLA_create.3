@@ -1,0 +1,19 @@
+.TH CLA_create 3
+.SH NAME
+CLA_create \- Allocate memory necessary for argument classification
+.SH LIBRARY
+cla (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.B #include \[dq]cla/cla.h\[dq]
+.br
+\fBconst struct cla * CLA_create (void);
+.SH DESCRIPTION
+.B CLA_create
+allocates memory necessary for classifying command line arguments.
+
+.SH RETURN VALUE
+A pointer to the abstract object required for command line argument classification.
+The user is responsible for freeing the memory allocated by \fBCLA_create\fR using
+\fBCLA_destroy\fR.
+.SH SEE ALSO
+\fBCLA\fR(3), \fBCLA_destroy\fR(3)
