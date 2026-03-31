@@ -24,8 +24,8 @@ enum token_type {
 };
 
 struct key {
-    const char * longname;
-    const char * shortname;
+    char * longname;
+    char * shortname;
     int noccurrences;
     enum key_type type;
 };
@@ -70,26 +70,58 @@ static int find_key_by_name (const struct cla * self, const char * name);
 
 static void add_key (struct cla * self, const char * longname, const char * shortname, enum key_type type) {
 
-    fprintf(stderr, "// TODO: consider managing your own memory for shortname and longname\n");
-
     assert_is_named(longname, shortname);
     assert_shortname_is_compliant(shortname);
     assert_shortname_isnt_duplicate(self, shortname);
     assert_longname_is_compliant(longname);
     assert_longname_isnt_duplicate(self, longname);
 
+    // if the keys.items array is full, double its capacity, and zero-initialize the new positions
     if (self->keys.len >= self->keys.cap) {
-        fprintf(stderr, "ERROR: Can't add any more keys, aborting.\n");
-        exit(EXIT_FAILURE);
+        errno = 0;
+        self->keys.items = reallocarray(self->keys.items, self->keys.cap * 2, sizeof(struct key));
+        if (self->keys.items == nullptr) {
+            fprintf(stderr, "%s\nERROR: Could not allocate memory for growing keys array, aborting.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        self->keys.cap *= 2;
+        for (int i = self->keys.len; i < self->keys.cap; i++) {
+            self->keys.items[i] = (struct key){};
+        }
     }
 
+    // define the struct key that will hold the new key
     int * i = &self->keys.len;
     self->keys.items[*i] = (struct key) {
-        .longname = longname,
-        .shortname = shortname,
+        .longname = nullptr,
+        .shortname = nullptr,
         .noccurrences = 0,
         .type = type,
     };
+
+    // if the new key has a longname, set some memory aside for it and copy longname into it
+    if (longname != nullptr) {
+        char * tmp = calloc(strlen(longname) + 1, sizeof(char));
+        if (tmp == nullptr) {
+            fprintf(stderr, "%s\nERROR: Could not allocate memory for longname %d, aborting.\n", strerror(errno), *i);
+            exit(EXIT_FAILURE);
+        }
+        self->keys.items[*i].longname = tmp;
+        strcpy(self->keys.items[*i].longname, longname);
+    }
+
+    // if the new key has a shortname, set some memory aside for it and copy shortname into it
+    if (shortname != nullptr) {
+        char * tmp = calloc(strlen(shortname) + 1, sizeof(char));
+        if (tmp == nullptr) {
+            fprintf(stderr, "%s\nERROR: Could not allocate memory for shortname %d, aborting.\n", strerror(errno), *i);
+            exit(EXIT_FAILURE);
+        }
+        self->keys.items[*i].shortname = tmp;
+        strcpy(self->keys.items[*i].shortname, shortname);
+    }
+
+    // increment keys.len
     (*i)++;
 }
 
@@ -130,11 +162,9 @@ static void assert_longname_is_compliant (const char * longname) {
 
 static void assert_longname_isnt_duplicate (const struct cla * self, const char * longname) {
     if (longname == nullptr) return;
-    for (int i = 0; i < self->keys.len; i++) {
-        if (strcmp(self->keys.items[i].longname, longname) == 0) {
-            fprintf(stderr, "ERROR: longname \"%s\" already exists, aborting.\n", longname);
-            exit(EXIT_FAILURE);
-        }
+    if (find_key_by_name(self, longname) != -1) {
+        fprintf(stderr, "ERROR: longname \"%s\" already exists, aborting.\n", longname);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -201,11 +231,9 @@ static void assert_shortname_is_compliant (const char * shortname) {
 
 static void assert_shortname_isnt_duplicate (const struct cla * self, const char * shortname) {
     if (shortname == nullptr) return;
-    for (int i = 0; i < self->keys.len; i++) {
-        if (strcmp(self->keys.items[i].shortname, shortname) == 0) {
-            fprintf(stderr, "ERROR: shortname \"%s\" already exists, aborting.\n", shortname);
-            exit(EXIT_FAILURE);
-        }
+    if (find_key_by_name(self, shortname) != -1) {
+        fprintf(stderr, "ERROR: shortname \"%s\" already exists, aborting.\n", shortname);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -254,30 +282,15 @@ int CLA_count_flag (const struct cla * self, const char * name) {
         fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
         exit(EXIT_FAILURE);
     }
-
-    fprintf(stderr, "// TODO: review logic\n");
-
-    for (struct token * token = &self->tokens.items[0];
-         token < &self->tokens.items[self->tokens.len];
-         token++) {
-
-        if (token->type != TOKEN_TYPE_FLAG) continue;
-
-        struct key * key = &self->keys.items[token->ikey];
-        bool token_str_matches_key_shortname = key->shortname != nullptr && strcmp(token->str, key->shortname) == 0;
-        bool token_str_matches_key_longname = key->longname != nullptr && strcmp(token->str, key->longname) == 0;
-
-        if (token_str_matches_key_shortname || token_str_matches_key_longname) {
-            return key->noccurrences;
-        }
+    int ikey = find_key_by_name(self, name);
+    if (ikey == -1) {
+        fprintf(stderr, "ERROR: Invalid flag '%s', aborting.\n", name);
     }
-    return 0;
+    return self->keys.items[ikey].noccurrences;
 }
 
 
 struct cla * CLA_create (void) {
-    fprintf(stderr, "// TODO: memory growing when adding more than 10 keys\n");
-
     errno = 0;
     struct cla * self = calloc(1, sizeof(struct cla));
     if (self == nullptr) {
@@ -285,7 +298,7 @@ struct cla * CLA_create (void) {
         exit(EXIT_FAILURE);
     }
 
-    int cap = 10;
+    int cap = 1;
     errno = 0;
     self->keys = (struct keys) {
         .cap = cap,
@@ -302,18 +315,33 @@ struct cla * CLA_create (void) {
 
 
 void CLA_destroy (struct cla ** self) {
+    // deallocate dynamic memory set aside for storing key.shortname for all keys
+    for (int i = 0; i < (*self)->keys.len; i++) {
+        free((*self)->keys.items[i].shortname);
+        (*self)->keys.items[i].shortname = nullptr;
+    }
 
+    // deallocate dynamic memory set aside for storing key.longname for all keys
+    for (int i = 0; i < (*self)->keys.len; i++) {
+        free((*self)->keys.items[i].longname);
+        (*self)->keys.items[i].longname = nullptr;
+    }
+
+    // deallocate dynamic memory set aside for storing array of keys
     free((*self)->keys.items);
     (*self)->keys.items = nullptr;
 
+    // deallocate dynamic memory set aside for storing token.str for all tokens
     for (int i = 0; i < (*self)->tokens.len; i++) {
         free((*self)->tokens.items[i].str);
         (*self)->tokens.items[i].str = nullptr;
     }
 
+    // deallocate dynamic memory set aside for storing array of tokens
     free((*self)->tokens.items);
     (*self)->tokens.items = nullptr;
 
+    // deallocate dynamic memory set aside for storing self
     free(*self);
     *self = nullptr;
 }
