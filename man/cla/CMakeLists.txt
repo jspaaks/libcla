@@ -2,7 +2,7 @@ include(GNUInstallDirs)
 install(
     FILES
         CLA_create.3
-        kwargs_destroy.3
+        CLA_destroy.3
         kwargs_get_optional_value.3
         kwargs_get_positional_value.3
         kwargs_get_required_value.3

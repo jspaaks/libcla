@@ -1,0 +1,14 @@
+.TH CLA_destroy 3
+.SH NAME
+CLA_destroy \- Free the memory associated with a struct cla object
+.SH LIBRARY
+cla library (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.B #include \[dq]cla/cla.h\[dq]
+.br
+\fBvoid CLA_destroy (struct cla ** \fIself\fR\fB);\fR
+.SH DESCRIPTION
+.B CLA_destroy
+frees the memory associated with a struct cla object \fIself\fR.
+.SH SEE ALSO
+\fBCLA\fR(3), \fBCLA_create\fR(3)
