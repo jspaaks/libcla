@@ -196,16 +196,14 @@ static void assert_required_keys_are_present (const struct cla * self) {
                 fprintf(stderr, "ERROR: Required key '%s/%s' not found%s, aborting.\n",
                         key->shortname, key->longname,
                         self->npositionals > 0 ? " or not all positionals have been defined" : "");
-                exit(EXIT_FAILURE);
             } else if (key->longname != nullptr) {
                 fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->longname,
                         self->npositionals > 0 ? " or not all positionals have been defined" : "");
-                exit(EXIT_FAILURE);
             } else {
                 fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->shortname,
                         self->npositionals > 0 ? " or not all positionals have been defined" : "");
-                exit(EXIT_FAILURE);
             }
+            exit(EXIT_FAILURE);
         }
     }
 }
