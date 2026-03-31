@@ -1,6 +1,11 @@
 include(GNUInstallDirs)
 install(
     FILES
+        CLA_add_flag.3
+        CLA_add_optional.3
+        CLA_add_positionals.3
+        CLA_add_required.3
+        CLA_count_flag.3
         CLA_create.3
         CLA_destroy.3
         CLA_get_value_optional.3
