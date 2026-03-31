@@ -442,10 +442,8 @@ bool CLA_has_flag (const struct cla * self, const char * name) {
 bool CLA_has_optional (const struct cla * self, const char * name) {
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
-    if (ikey == -1) {
-        fprintf(stderr, "ERROR: There is no optional argument named '%s', aborting.\n", name);
-        exit(EXIT_FAILURE);
-    }
+    assert_key_exists(ikey, name);
+    assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
     return self->keys.items[ikey].noccurrences > 0;
 }
 
@@ -500,10 +498,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
         // if there is a key whose longname or shortname matches
         // token's str, assign key->type to token->type
         int ikey = find_key_by_name(self, token->str);
-        if (ikey == -1) {
-            fprintf(stderr, "ERROR: Found unknown option '%s', aborting.\n", self->tokens.items[itoken].str);
-            exit(EXIT_FAILURE);
-        }
+        assert_key_exists(ikey, token->str);
         token->type = (enum token_type) self->keys.items[ikey].type;
         token->ikey = ikey;
 
