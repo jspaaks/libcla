@@ -11,6 +11,7 @@ enum key_type {
     KEY_TYPE_REQUIRED,
     KEY_TYPE_OPTIONAL,
     KEY_TYPE_FLAG,
+    KEY_TYPE_COUNT,
 };
 
 enum token_type {
@@ -21,6 +22,7 @@ enum token_type {
     TOKEN_TYPE_POSITIONAL,
     TOKEN_TYPE_EXENAME,
     TOKEN_TYPE_VALUE,
+    TOKEN_TYPE_COUNT,
 };
 
 struct key {
@@ -58,7 +60,11 @@ struct cla {
 
 
 static void add_key (struct cla * cla, const char * longname, const char * shortname, enum key_type type);
+static void assert_arguments_have_been_parsed (const struct cla * self);
 static void assert_is_named (const char * longname, const char * shortname);
+static void assert_key_exists (int ikey, const char * name);
+static void assert_key_is_of_type (const struct cla * self, int ikey, const char * name, enum key_type type);
+static void assert_key_is_used (const struct cla * self, int ikey, const char * name);
 static void assert_longname_is_compliant (const char * longname);
 static void assert_longname_isnt_duplicate (const struct cla * self, const char * longname);
 static void assert_required_keys_are_present (const struct cla * self);
@@ -126,9 +132,46 @@ static void add_key (struct cla * self, const char * longname, const char * shor
 }
 
 
+static void assert_arguments_have_been_parsed (const struct cla * self) {
+    if (self->isfinal == false) {
+        fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 static void assert_is_named (const char * longname, const char * shortname) {
     if (longname == nullptr && shortname == nullptr) {
         fprintf(stderr, "ERROR: Can't add an unnamed option, aborting.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void assert_key_exists (int ikey, const char * name) {
+    if (ikey == -1) {
+        fprintf(stderr, "ERROR: Unknown argument name '%s', aborting.\n", name);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void assert_key_is_of_type (const struct cla * self, int ikey, const char * name, enum key_type type) {
+    const char * key_type_names[KEY_TYPE_COUNT] = {
+        [KEY_TYPE_REQUIRED] = "a required argument",
+        [KEY_TYPE_OPTIONAL] = "an optional argument",
+        [KEY_TYPE_FLAG] = "a flag",
+    };
+    if (self->keys.items[ikey].type != type) {
+        fprintf(stderr, "ERROR: Key '%s' is not %s, aborting.\n", name, key_type_names[type]);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void assert_key_is_used (const struct cla * self, int ikey, const char * name) {
+    if (self->keys.items[ikey].noccurrences == 0) {
+        fprintf(stderr, "ERROR: '%s' is valid but it hasn't been used, aborting.\n", name);
         exit(EXIT_FAILURE);
     }
 }
@@ -276,15 +319,10 @@ void CLA_add_required (struct cla * self, const char * longname, const char * sh
 
 
 int CLA_count_flag (const struct cla * self, const char * name) {
-    if (self->isfinal == false) {
-        fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
-        exit(EXIT_FAILURE);
-    }
+    assert_arguments_have_been_parsed (self);
     int ikey = find_key_by_name(self, name);
-    if (ikey == -1) {
-        fprintf(stderr, "ERROR: Invalid flag '%s', aborting.\n", name);
-        exit(EXIT_FAILURE);
-    }
+    assert_key_exists (ikey, name);
+    assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
     return self->keys.items[ikey].noccurrences;
 }
 
@@ -346,12 +384,12 @@ void CLA_destroy (struct cla ** self) {
 }
 
 
-const char * CLA_get_optional_value (const struct cla * self, const char * name) {
-    if (self->isfinal == false) {
-        fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
-        exit(EXIT_FAILURE);
-    }
+const char * CLA_get_value_optional (const struct cla * self, const char * name) {
+    assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
+    assert_key_exists (ikey, name);
+    assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
+    assert_key_is_used(self, ikey, name);
     for (int itoken = 0; itoken < self->tokens.len; itoken++) {
         if (self->tokens.items[itoken].ikey == ikey) {
             return self->tokens.items[itoken + 1].str;
@@ -361,7 +399,8 @@ const char * CLA_get_optional_value (const struct cla * self, const char * name)
 }
 
 
-const char * CLA_get_positional_value (const struct cla * self, int ipos) {
+const char * CLA_get_value_positional (const struct cla * self, int ipos) {
+    assert_arguments_have_been_parsed(self);
     if (ipos < 0) {
         fprintf(stderr, "ERROR: Can't use a negative index to retrieve a positional argument, aborting.\n");
         exit(EXIT_FAILURE);
@@ -375,13 +414,39 @@ const char * CLA_get_positional_value (const struct cla * self, int ipos) {
 }
 
 
-const char * CLA_get_required_value (const struct cla * self, const char * name) {
-    const char * value = CLA_get_optional_value(self, name);
-    if (value == nullptr) {
-        fprintf(stderr, "ERROR: Required argument '%s' not found, aborting.\n", name);
+const char * CLA_get_value_required (const struct cla * self, const char * name) {
+    assert_arguments_have_been_parsed(self);
+    int ikey = find_key_by_name(self, name);
+    assert_key_exists (ikey, name);
+    assert_key_is_of_type(self, ikey, name, KEY_TYPE_REQUIRED);
+    assert_key_is_used(self, ikey, name);
+    for (int itoken = 0; itoken < self->tokens.len; itoken++) {
+        if (self->tokens.items[itoken].ikey == ikey) {
+            return self->tokens.items[itoken + 1].str;
+        }
+    }
+    fprintf(stderr, "ERROR: Something went wrong retrieving the value of '%s', aborting.\n", name);
+    exit(EXIT_FAILURE);
+}
+
+
+bool CLA_has_flag (const struct cla * self, const char * name) {
+    assert_arguments_have_been_parsed (self);
+    int ikey = find_key_by_name(self, name);
+    assert_key_exists (ikey, name);
+    assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
+    return CLA_count_flag(self, name) > 0;
+}
+
+
+bool CLA_has_optional (const struct cla * self, const char * name) {
+    assert_arguments_have_been_parsed (self);
+    int ikey = find_key_by_name(self, name);
+    if (ikey == -1) {
+        fprintf(stderr, "ERROR: There is no optional argument named '%s', aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    return value;
+    return self->keys.items[ikey].noccurrences > 0;
 }
 
 
@@ -496,9 +561,4 @@ static int find_key_by_name (const struct cla * self, const char * name) {
         if (a || b) return ikey;
     }
     return -1;
-}
-
-
-bool CLA_has_flag (const struct cla * self, const char * name) {
-    return CLA_count_flag(self, name) > 0;
 }
