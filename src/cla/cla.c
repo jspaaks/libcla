@@ -283,6 +283,7 @@ int CLA_count_flag (const struct cla * self, const char * name) {
     int ikey = find_key_by_name(self, name);
     if (ikey == -1) {
         fprintf(stderr, "ERROR: Invalid flag '%s', aborting.\n", name);
+        exit(EXIT_FAILURE);
     }
     return self->keys.items[ikey].noccurrences;
 }
