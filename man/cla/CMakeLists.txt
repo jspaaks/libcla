@@ -4,7 +4,7 @@ install(
         CLA_create.3
         CLA_destroy.3
         CLA_get_value_optional.3
-        kwargs_get_positional_value.3
+        CLA_get_value_positional.3
         kwargs_get_required_value.3
         kwargs_has_flag.3
         kwargs_has_optional.3
