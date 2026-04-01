@@ -4,7 +4,7 @@
 
 
 int main (int argc, const char * argv[]) {
-    // create the kwargs object
+    // create the command line arguments object
     struct cla * cla = CLA_create();
 
     // add a required argument with a longname and a shortname
