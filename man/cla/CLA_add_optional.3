@@ -71,24 +71,24 @@ int main(int argc, const char * argv[]) {
 Here's some sample output of the above program:
 .EX
 .PP
-$ ./example-cla-add-optional
+$ ./example-optional
 .PP
-$ ./example-cla-add-optional --directory
+$ ./example-optional --directory
 ERROR: '--directory' requires a value but none given, aborting.
 .PP
-$ ./example-cla-add-optional --directory the_directory
+$ ./example-optional --directory the_directory
 --directory/--d=the_directory
 .PP
-$ ./example-cla-add-optional --author the_author
+$ ./example-optional --author the_author
 --author=the_author
 .PP
-$ ./example-cla-add-optional -l the_length
+$ ./example-optional -l the_length
 -l=the_length
 .PP
-$ ./example-cla-add-optional --directory the_directory --author the_author -l
+$ ./example-optional --directory the_directory --author the_author -l
 ERROR: '-l' requires a value but none given, aborting.
 .PP
-$ ./example-cla-add-optional --directory the_directory --author the_author -l the_length
+$ ./example-optional --directory the_directory --author the_author -l the_length
 --directory/--d=the_directory
 -l=the_length
 --author=the_author

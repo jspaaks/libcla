@@ -17,24 +17,24 @@ elseif(UNIX)
     list(APPEND CMAKE_INSTALL_RPATH $ORIGIN/../lib)
 endif()
 
-add_executable(tgt_exe_example_cla_add_required)
+add_executable(tgt_exe_example_required)
 
-set_property(TARGET tgt_exe_example_cla_add_required PROPERTY OUTPUT_NAME example-cla-add-required)
+set_property(TARGET tgt_exe_example_required PROPERTY OUTPUT_NAME example-required)
 
 target_compile_definitions(
-    tgt_exe_example_cla_add_required
+    tgt_exe_example_required
     PRIVATE
         $<$<CONFIG:Debug>:DEBUG>
 )
 
 target_compile_features(
-    tgt_exe_example_cla_add_required
+    tgt_exe_example_required
     PRIVATE
         c_std_23
 )
 
 target_compile_options(
-    tgt_exe_example_cla_add_required
+    tgt_exe_example_required
     PRIVATE
         -Wall
         -Wextra
@@ -45,21 +45,21 @@ target_compile_options(
 )
 
 target_include_directories(
-    tgt_exe_example_cla_add_required
+    tgt_exe_example_required
     PRIVATE
         ${PROJECT_ROOT}/include
 )
 
 target_link_libraries(
-    tgt_exe_example_cla_add_required
+    tgt_exe_example_required
     PRIVATE
         tgt_lib_cla
 )
 
 target_sources(
-    tgt_exe_example_cla_add_required
+    tgt_exe_example_required
     PRIVATE
-        ${PROJECT_ROOT}/src/example_cla_add_required/main.c
+        ${PROJECT_ROOT}/src/example_required/main.c
 )
 
-install(TARGETS tgt_exe_example_cla_add_required)
+install(TARGETS tgt_exe_example_required)

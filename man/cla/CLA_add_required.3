@@ -67,24 +67,24 @@ int main(int argc, const char * argv[]) {
 Here's some sample output of the above program:
 .EX
 .PP
-$ ./example-cla-add-required
+$ ./example-required
 ERROR: Required key '-n/--nsamples' not found, aborting.
 .PP
-$ ./example-cla-add-required --nsamples
+$ ./example-required --nsamples
 ERROR: '--nsamples' requires a value but none given, aborting.
 .PP
-$ ./example-cla-add-required --nsamples 12
+$ ./example-required --nsamples 12
 ERROR: Required key '--freq' not found, aborting.
 .PP
-$ ./example-cla-add-required --nsamples 12 --freq 11000
+$ ./example-required --nsamples 12 --freq 11000
 ERROR: Required key '-f' not found, aborting.
 .PP
-$ ./example-cla-add-required --nsamples 12 --freq 11000 -f file.wav
+$ ./example-required --nsamples 12 --freq 11000 -f file.wav
 --nsamples/-n=12
 --freq=11000
 -f=file.wav
 .PP
-$ ./example-cla-add-required --nsamples 12 --freq 11000 -f file.wav -n 23
+$ ./example-required --nsamples 12 --freq 11000 -f file.wav -n 23
 ERROR: Found multiple usages of key '-n/--nsamples', aborting.
 .EE
 .SH SEE ALSO
