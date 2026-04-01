@@ -232,10 +232,12 @@ static void assert_name_is_compliant (const char * name) {
         fprintf(stderr, "ERROR: name \"%s\" should start with \"--\", aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    if (!isalnum(name[2])) {
-        fprintf(stderr, "ERROR: name \"%s\" character at index 2 should\n"
-                        "be [a-zA-Z], aborting.\n", name);
-        exit(EXIT_FAILURE);
+    for (int i = 2; i < (int) strlen(name); i++) {
+        if (!isalnum(name[i])) {
+            fprintf(stderr, "ERROR: name \"%s\" character at index %d should\n"
+                            "be [0-9a-zA-Z], aborting.\n", name, i);
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
