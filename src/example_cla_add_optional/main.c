@@ -7,7 +7,7 @@ int main(int argc, const char * argv[]) {
     // allocate dynamic memory to store information about what arguments to expect
     struct cla * cla = CLA_create();
 
-    // define a few flags
+    // define a few optional arguments
     CLA_add_optional(cla, "--directory", "-d");
     CLA_add_optional(cla, "--author", nullptr);
     CLA_add_optional(cla, nullptr, "-l");
