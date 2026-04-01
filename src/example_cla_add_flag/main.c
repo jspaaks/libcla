@@ -4,7 +4,8 @@
 
 int main(int argc, const char * argv[]) {
 
-    // allocate dynamic memory to store information about what arguments to expect
+    // allocate dynamic memory to store information about
+    // what arguments to expect
     struct cla * cla = CLA_create();
 
     // define a few flags

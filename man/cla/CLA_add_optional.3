@@ -8,12 +8,16 @@ cla (\fIlibcla\fR, \fI\-lcla\fR)
 .br
 \fBvoid CLA_add_optional (struct cla * self, const char * name, const char * alias);
 .SH DESCRIPTION
-Register an optional argument whose name is \fIname\fR and whose alias is \fIalias\fR. \fIname\fR
-should start with '--', be between 4 and 64 characters long (not including the terminating null
-character), and consist only of alphanumeric characters [0-9a-zA-Z]. \fIalias\fR should start
-with '-', be 2 characters long (not including the terminating null character), and consist only of
-alphanumeric characters [0-9a-zA-Z]. In addition, one of \fIname\fR and \fIalias\fR may be left
-unspecified by assigning it a nullptr value. Optional arguments may not be used more than one time.
+Register an optional argument whose name is \fIname\fR and whose alias is \fIalias\fR. 
+.PP
+\fIname\fR should start with '--', be between 4 and 64 characters long (not including the
+terminating null character), and consist only of alphanumeric characters [0-9a-zA-Z].
+.PP
+\fIalias\fR should start with '-', be 2 characters long (not including the terminating null
+character), and consist only of alphanumeric characters [0-9a-zA-Z].
+.PP
+In addition, one of \fIname\fR and \fIalias\fR may be left
+unspecified by assigning it a nullptr value.
 .SH EXAMPLES
 .PP
 .EX
@@ -23,7 +27,8 @@ unspecified by assigning it a nullptr value. Optional arguments may not be used 
 
 int main(int argc, const char * argv[]) {
 
-    // allocate dynamic memory to store information about what arguments to expect
+    // allocate dynamic memory to store information about
+    // what arguments to expect
     struct cla * cla = CLA_create();
 
     // define a few optional arguments
@@ -62,18 +67,18 @@ int main(int argc, const char * argv[]) {
 Here's some sample output of the above program:
 .PP
 .EX
- $ ./dist/bin/example-cla-add-optional 
-$ ./dist/bin/example-cla-add-optional --directory
+$ ./example-cla-add-optional
+$ ./example-cla-add-optional --directory
 ERROR: '--directory' requires a value but none given, aborting.
-$ ./dist/bin/example-cla-add-optional --directory the_directory
+$ ./example-cla-add-optional --directory the_directory
 --directory/--d=the_directory
-$ ./dist/bin/example-cla-add-optional --author the_author
+$ ./example-cla-add-optional --author the_author
 --author=the_author
-$ ./dist/bin/example-cla-add-optional -l the_length
+$ ./example-cla-add-optional -l the_length
 -l=the_length
-$ ./dist/bin/example-cla-add-optional --directory the_directory --author the_author -l
+$ ./example-cla-add-optional --directory the_directory --author the_author -l
 ERROR: '-l' requires a value but none given, aborting.
-$ ./dist/bin/example-cla-add-optional --directory the_directory --author the_author -l the_length
+$ ./example-cla-add-optional --directory the_directory --author the_author -l the_length
 --directory/--d=the_directory
 -l=the_length
 --author=the_author

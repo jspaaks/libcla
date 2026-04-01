@@ -8,12 +8,16 @@ cla (\fIlibcla\fR, \fI\-lcla\fR)
 .br
 \fBvoid CLA_add_flag (struct cla * self, const char * name, const char * alias);
 .SH DESCRIPTION
-Register a flag argument whose name is \fIname\fR and whose alias is \fIalias\fR. \fIname\fR should
-start with '--', be between 4 and 64 characters long (not including the terminating null character),
-and consist only of alphanumeric characters [0-9a-zA-Z]. \fIalias\fR should start with '-', be 2
-characters long (not including the terminating null character), and consist only of alphanumeric
-characters [0-9a-zA-Z]. In addition, one of \fIname\fR and \fIalias\fR may be left unspecified by
-assigning it a nullptr value. Flags may occur more than one time, see \fBCLA_count_flag\fR(3).
+Register a flag argument whose name is \fIname\fR and whose alias is \fIalias\fR.
+.PP
+\fIname\fR should start with '--', be between 4 and 64 characters long (not including the
+terminating null character), and consist only of alphanumeric characters [0-9a-zA-Z].
+.PP
+\fIalias\fR should start with '-', be 2 characters long (not including the terminating null
+character), and consist only of alphanumeric characters [0-9a-zA-Z].
+.PP
+In addition, one of \fIname\fR and \fIalias\fR may be left unspecified by
+assigning it a nullptr value.
 .SH EXAMPLES
 .PP
 .EX
@@ -23,7 +27,8 @@ assigning it a nullptr value. Flags may occur more than one time, see \fBCLA_cou
 
 int main(int argc, const char * argv[]) {
 
-    // allocate dynamic memory to store information about what arguments to expect
+    // allocate dynamic memory to store information about
+    // what arguments to expect
     struct cla * cla = CLA_create();
 
     // define a few flags
