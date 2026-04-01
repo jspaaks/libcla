@@ -37,5 +37,7 @@ int main(int argc, const char * argv[]) {
 
     // free memory resources
     CLA_destroy(&cla);
+
+    // exit
     return EXIT_SUCCESS;
 }
