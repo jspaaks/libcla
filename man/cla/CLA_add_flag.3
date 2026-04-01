@@ -1,13 +1,17 @@
 .TH CLA_add_flag 3
 .SH NAME
+.PP
 CLA_add_flag \- Register a flag argument
 .SH LIBRARY
+.PP
 cla (\fIlibcla\fR, \fI\-lcla\fR)
 .SH SYNOPSIS
+.PP
 .B #include \[dq]cla/cla.h\[dq]
-.br
+.PP
 \fBvoid CLA_add_flag (struct cla * self, const char * name, const char * alias);
 .SH DESCRIPTION
+.PP
 Register a flag argument whose name is \fIname\fR and whose alias is \fIalias\fR.
 .PP
 \fIname\fR should start with '--', be between 4 and 64 characters long (not including the
@@ -65,16 +69,18 @@ int main(int argc, const char * argv[]) {
 .EE
 .PP
 Here's some sample output of the above program:
-.PP
 .EX
+.PP
+$ ./example-cla-add-flag
+.PP
 $ ./example-cla-add-flag -l -l --author -d --directory
 --directory/--d was used 2 times
 -l was used 2 times
 --author was used 1 times
-$ ./example-cla-add-flag
+.PP
 $ ./example-cla-add-flag --author
 --author was used 1 times
 .EE
-.PP
 .SH SEE ALSO
+.PP
 \fBCLA\fR(3), \fBCLA_count_flag\fR(3), \fBCLA_has_flag\fR(3)

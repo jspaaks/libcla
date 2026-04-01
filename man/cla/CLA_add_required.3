@@ -65,22 +65,28 @@ int main(int argc, const char * argv[]) {
 .EE
 .PP
 Here's some sample output of the above program:
-.PP
 .EX
+.PP
 $ ./example-cla-add-required
 ERROR: Required key '-n/--nsamples' not found, aborting.
+.PP
 $ ./example-cla-add-required --nsamples
 ERROR: '--nsamples' requires a value but none given, aborting.
+.PP
 $ ./example-cla-add-required --nsamples 12
 ERROR: Required key '--freq' not found, aborting.
+.PP
 $ ./example-cla-add-required --nsamples 12 --freq 11000
 ERROR: Required key '-f' not found, aborting.
+.PP
 $ ./example-cla-add-required --nsamples 12 --freq 11000 -f file.wav
 --nsamples/-n=12
 --freq=11000
 -f=file.wav
-.EE
 .PP
+$ ./example-cla-add-required --nsamples 12 --freq 11000 -f file.wav -n 23
+ERROR: Found multiple usages of key '-n/--nsamples', aborting.
+.EE
 .SH SEE ALSO
 .PP
 \fBCLA\fR(3), \fBCLA_get_value_required\fR(3)
