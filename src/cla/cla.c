@@ -144,7 +144,7 @@ static void assert_alias_is_compliant (const char * alias) {
         fprintf(stderr, "ERROR: alias \"%s\" should start with \'-\', aborting.\n", alias);
         exit(EXIT_FAILURE);
     }
-    if (!isalpha(alias[1])) {
+    if (!isalnum(alias[1])) {
         fprintf(stderr, "ERROR: alias \"%s\" character at index 1 should\n"
                         "be [a-zA-Z], aborting.\n", alias);
         exit(EXIT_FAILURE);
@@ -232,7 +232,7 @@ static void assert_name_is_compliant (const char * name) {
         fprintf(stderr, "ERROR: name \"%s\" should start with \"--\", aborting.\n", name);
         exit(EXIT_FAILURE);
     }
-    if (!isalpha(name[2])) {
+    if (!isalnum(name[2])) {
         fprintf(stderr, "ERROR: name \"%s\" character at index 2 should\n"
                         "be [a-zA-Z], aborting.\n", name);
         exit(EXIT_FAILURE);
