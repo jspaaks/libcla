@@ -1,0 +1,79 @@
+.TH CLA_count_flag 3
+.SH NAME
+.PP
+CLA_count_flag \- Count the usages of a flag
+.SH LIBRARY
+.PP
+cla (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBint CLA_count_flag (struct cla * self, const char * name);
+.SH DESCRIPTION
+.PP
+Count how many times the flag with name or alias \fIname\fR was used when instantiating the program.
+.PP
+\fIname\fR should be a previously registered flag name or flag alias, see \fBCLA_add_flag\fR(3).
+.SH EXAMPLES
+.PP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, const char * argv[]) {
+
+    // allocate dynamic memory to store information about
+    // what arguments to expect
+    struct cla * cla = CLA_create();
+
+    // define a few flags
+    CLA_add_flag(cla, "--directory", "-d");
+    CLA_add_flag(cla, "--author", nullptr);
+    CLA_add_flag(cla, nullptr, "-l");
+
+    // parse the command line arguments and store the result in `cla`
+    CLA_parse(cla, argc, argv);
+
+    // print how many times each flag was used, if it was used at all
+    if (CLA_has_flag(cla, "--directory")) {
+        fprintf(stdout,
+                "--directory/--d was used %d times\\n",
+                CLA_count_flag(cla, "--directory"));
+    }
+
+    if (CLA_has_flag(cla, "-l")) {
+        fprintf(stdout,
+                "-l was used %d times\\n",
+                CLA_count_flag(cla, "-l"));
+    }
+
+    if (CLA_has_flag(cla, "--author")) {
+        fprintf(stdout,
+                "--author was used %d times\\n",
+                CLA_count_flag(cla, "--author"));
+    }
+
+    // free memory resources
+    CLA_destroy(&cla);
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Here's some sample output of the above program:
+.EX
+.PP
+$ ./example-cla-add-flag
+.PP
+$ ./example-cla-add-flag -l -l --author -d --directory
+--directory/--d was used 2 times
+-l was used 2 times
+--author was used 1 times
+.PP
+$ ./example-cla-add-flag --author
+--author was used 1 times
+.EE
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_add_flag\fR(3), \fBCLA_has_flag\fR(3)
