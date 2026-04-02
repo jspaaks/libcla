@@ -83,31 +83,31 @@ int main (int argc, const char * argv[]) {
 Here's some sample output of the above program:
 .IP
 .EX
-$ ./example_parse
+$ ./example-parse
 ERROR: Expected at least 1 positional arguments, aborting.
 .IP
 .EX
-$ ./example_parse positional-value-0
+$ ./example-parse positional-value-0
 ERROR: Required key '-a/--aa' not found, aborting.
 .IP
 .EX
-$ ./example_parse -a positional-value-0
+$ ./example-parse -a positional-value-0
 ERROR: '-a' requires a value but none given or not all positionals have been defined, aborting.
 .EE
 .IP
 .EX
-$ ./example_parse -a value-of--a positional-value-0
+$ ./example-parse -a value-of--a positional-value-0
 User-provided arguments were parsed as follows:
-exename    ./example_parse
+exename    ./example-parse
 required   -a
 value      value-of--a
 positional positional-value-0
 .EE
 .IP
 .EX
-$ ./example_parse -a value-of--a -b value-of--b positional-value-0
+$ ./example-parse -a value-of--a -b value-of--b positional-value-0
 User-provided arguments were parsed as follows:
-exename    ./example_parse
+exename    ./example-parse
 required   -a
 value      value-of--a
 optional   -b
@@ -116,9 +116,9 @@ positional positional-value-0
 .EE
 .IP
 .EX
-$ ./example_parse -a value-of--a -b value-of--b -c positional-value-0
+$ ./example-parse -a value-of--a -b value-of--b -c positional-value-0
 User-provided arguments were parsed as follows:
-exename    ./example_parse
+exename    ./example-parse
 required   -a
 value      value-of--a
 optional   -b
@@ -128,9 +128,9 @@ positional positional-value-0
 .EE
 .IP
 .EX
-$ ./example_parse -a value-of--a -b value-of--b -c -c positional-value-0
+$ ./example-parse -a value-of--a -b value-of--b -c -c positional-value-0
 User-provided arguments were parsed as follows:
-exename    ./example_parse
+exename    ./example-parse
 required   -a
 value      value-of--a
 optional   -b

@@ -19,7 +19,7 @@ endif()
 
 add_executable(tgt_exe_example_cla)
 
-set_property(TARGET tgt_exe_example_cla PROPERTY OUTPUT_NAME example)
+set_property(TARGET tgt_exe_example_cla PROPERTY OUTPUT_NAME example-cla)
 
 target_compile_definitions(
     tgt_exe_example_cla
