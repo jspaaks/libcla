@@ -489,7 +489,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
     // iterate over the non-positionals: flags, requireds, optionals
     int ipos0 = argc - self->npositionals;
     if (ipos0 < 1) {
-        fprintf(stderr, "ERROR: Expected at least %d positional arguments, aborting.\n", self->npositionals);
+        fprintf(stderr, "ERROR: Expected at least %d positional argument%s, aborting.\n", self->npositionals, self->npositionals == 1 ? "" : "s");
         exit(EXIT_FAILURE);
     }
     for (int itoken = 1; itoken < ipos0; itoken++) {
