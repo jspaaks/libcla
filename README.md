@@ -43,7 +43,7 @@ For instructions on building, see [`README.dev.md`](README.dev.md).
 ## Example
 
 `example-parse` is an example program for the usage of the library. Its source code is available in
-`src/example_parse/main.c` and is reproduced below for convenience:
+[`src/example_parse/main.c`](src/example_parse/main.c) and is reproduced below for convenience:
 
 ```c
 #include "cla/cla.h"
