@@ -1,7 +1,7 @@
 .TH CLA_add_optional 3
 .SH NAME
 .PP
-CLA_add_optional \- Register a optional named argument
+CLA_add_optional \- Register an optional named argument
 .SH LIBRARY
 .PP
 cla (\fIlibcla\fR, \fI\-lcla\fR)
@@ -24,7 +24,7 @@ In addition, one of \fIname\fR and \fIalias\fR may be left
 unspecified by assigning it a nullptr value.
 .SH EXAMPLES
 .PP
-The code example below represents a program that expects three optional, named arguments: one that
+The code example below represents a program that expects three optional named arguments: one that
 can be referenced through its name \[dq]--directory\[dq] and its alias \[dq]-d\[dq]; one that can be
 referenced only through its name \[dq]--author\[dq]; and one that can be referenced only through
 its alias \[dq]-l\[dq]. For each optional named argument that was used during invocation, the
