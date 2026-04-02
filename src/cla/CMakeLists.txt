@@ -1,25 +1,13 @@
-cmake_minimum_required(VERSION 3.23...3.28)
-
-set(PROJECT_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
-
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
-endif()
-
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE "${CMAKE_BINARY_DIR}/dist")
-endif()
-
-set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-if (APPLE)
-    list(APPEND CMAKE_INSTALL_RPATH @loader_path/../lib)
-elseif(UNIX)
-    list(APPEND CMAKE_INSTALL_RPATH $ORIGIN/../lib)
-endif()
-
 add_library(tgt_lib_cla SHARED)
 
+set_property(TARGET tgt_lib_cla PROPERTY C_VISIBILITY_PRESET hidden)
 set_property(TARGET tgt_lib_cla PROPERTY OUTPUT_NAME cla)
+
+generate_export_header(
+    tgt_lib_cla
+    BASE_NAME cla
+    EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/cla/export.h
+)
 
 target_compile_definitions(
     tgt_lib_cla
@@ -53,14 +41,16 @@ target_include_directories(
 target_sources(
     tgt_lib_cla
     PRIVATE
-        ${PROJECT_ROOT}/src/cla/cla.c
+        cla.c
     PUBLIC
         FILE_SET fset_lib_cla_headers
-        TYPE HEADERS
-        BASE_DIRS
-            ${PROJECT_ROOT}/include
-        FILES
-            ${PROJECT_ROOT}/include/cla/cla.h
+            TYPE HEADERS
+            BASE_DIRS
+                ../../include
+                ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
+            FILES
+                ../../include/cla/cla.h
+                ${CMAKE_BINARY_DIR}/include/cla/export.h  # cmake-generated file
 )
 
 install(TARGETS tgt_lib_cla

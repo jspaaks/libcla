@@ -4,6 +4,11 @@ project(project_cla LANGUAGES C)
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
+include(CTest)
+include(GenerateExportHeader)
+include(GNUInstallDirs)
+
+
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
