@@ -81,23 +81,23 @@ int main (int argc, const char * argv[]) {
     return EXIT_SUCCESS;
 ```
 
-Let's see how that works in practice.
+Let's see how that works in practice:
 
 ```console
 $ ./example-parse
-ERROR: Expected at least 1 positional arguments, aborting.
+ERROR: Expected at least 1 positional argument, aborting.
 ```
 OK, so add a value for the first positional argument:
 ```console
 $ ./example-parse positional-value-0
 ERROR: Required key '-a/--aa' not found, aborting.
 ```
-Makes sense, our program above expects it--let's add it then:
+Makes sense, our program above expects an argument named `-a` or `--aa`; let's add it then:
 ```console
 $ ./example-parse -a positional-value-0
 ERROR: '-a' requires a value but none given or not all positionals have been defined, aborting.
 ```
-Ah yes, it is a key-value pair so it needs a value:
+Ah yes, `-a` is a key-value pair so it needs a value:
 ```console
 $ ./example-parse -a value-of--a positional-value-0
 User-provided arguments were parsed as follows:
