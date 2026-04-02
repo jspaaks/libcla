@@ -1,5 +1,5 @@
 #include "cla/cla.h"
-#include <ctype.h>           // isalpha
+#include <ctype.h>           // isalnum
 #include <errno.h>           // errno
 #include <stdio.h>           // fprintf, stderr
 #include <stdlib.h>          // calloc, exit
@@ -275,15 +275,12 @@ static void assert_required_keys_are_present (const struct cla * self) {
         }
         if (found == false) {
             if (key->name != nullptr && key->alias != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s/%s' not found%s, aborting.\n",
-                        key->alias, key->name,
-                        self->npositionals > 0 ? " or not all positionals have been defined" : "");
+                fprintf(stderr, "ERROR: Required key '%s/%s' not found, aborting.\n",
+                        key->alias, key->name);
             } else if (key->name != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->name,
-                        self->npositionals > 0 ? " or not all positionals have been defined" : "");
+                fprintf(stderr, "ERROR: Required key '%s' not found, aborting.\n", key->name);
             } else {
-                fprintf(stderr, "ERROR: Required key '%s' not found%s, aborting.\n", key->alias,
-                        self->npositionals > 0 ? " or not all positionals have been defined" : "");
+                fprintf(stderr, "ERROR: Required key '%s' not found, aborting.\n", key->alias);
             }
             exit(EXIT_FAILURE);
         }
@@ -541,7 +538,8 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 }
 
 
-void CLA_print_parse_result (const struct cla * self) {
+void CLA_parsed_as (const struct cla * self, FILE * stream) {
+    assert_arguments_have_been_parsed(self);
     const char * typenames[] = {
         [TOKEN_TYPE_ERR] = "error",
         [TOKEN_TYPE_REQUIRED] = "required",
@@ -551,12 +549,11 @@ void CLA_print_parse_result (const struct cla * self) {
         [TOKEN_TYPE_EXENAME] = "exename",
         [TOKEN_TYPE_VALUE] = "value",
     };
-    fprintf(stdout, "Command line input parsed as:\n");
+    fprintf(stream, "User-provided arguments were parsed as follows:\n");
     for (int itoken = 0; itoken < self->tokens.len; itoken++) {
         struct token * token = &self->tokens.items[itoken];
-        fprintf(stdout, "%-10s %s\n", typenames[token->type], token->str);
+        fprintf(stream, "%-10s %s\n", typenames[token->type], token->str);
     }
-    fprintf(stdout, "\n");
 }
 
 
