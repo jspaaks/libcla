@@ -8,20 +8,20 @@ int main(int argc, const char * argv[]) {
     // what arguments to expect
     struct cla * cla = CLA_create();
 
-    // specify that our program will have exactly 2 positional arguments
+    // specify that the program will have exactly 2
+    // positional arguments
     CLA_add_positionals(cla, 2);
 
-    // parse the command line arguments and store the result in `cla`
+    // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
 
-    // print the value of each positional argument
-    fprintf(stdout,
-           "first positional=%s\n",
-           CLA_get_value_positional(cla, 0));
+    // print the value of the first positional
+    fprintf(stdout, "positional[0] = %s\n",
+            CLA_get_value_positional(cla, 0));
 
-    fprintf(stdout,
-           "second positional=%s\n",
-           CLA_get_value_positional(cla, 1));
+    // print the value of the second positional
+    fprintf(stdout, "positional[1] = %s\n",
+            CLA_get_value_positional(cla, 1));
 
     // free memory resources
     CLA_destroy(&cla);

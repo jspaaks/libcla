@@ -17,6 +17,9 @@ Register the number of positionals \fInpositionals\fR.
 \fInpositionals\fR should be a positive integer number.
 .SH EXAMPLES
 .PP
+The code example below represents a program that expects exactly two positional arguments, which it
+prints when the program is invoked. 
+.IP
 .EX
 #include "cla/cla.h"
 #include <stdio.h>
@@ -28,20 +31,20 @@ int main(int argc, const char * argv[]) {
     // what arguments to expect
     struct cla * cla = CLA_create();
 
-    // specify that our program will have exactly 2 positional arguments
+    // specify that the program will have exactly 2
+    // positional arguments
     CLA_add_positionals(cla, 2);
 
-    // parse the command line arguments and store the result in `cla`
+    // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
 
-    // print the value of each positional argument
-    fprintf(stdout,
-           "first positional=%s\\n",
-           CLA_get_value_positional(cla, 0));
+    // print the value of the first positional
+    fprintf(stdout, "positional[0] = %s\\n",
+            CLA_get_value_positional(cla, 0));
 
-    fprintf(stdout,
-           "second positional=%s\\n",
-           CLA_get_value_positional(cla, 1));
+    // print the value of the second positional
+    fprintf(stdout, "positional[1] = %s\\n",
+            CLA_get_value_positional(cla, 1));
 
     // free memory resources
     CLA_destroy(&cla);
@@ -52,14 +55,16 @@ int main(int argc, const char * argv[]) {
 .EE
 .PP
 Here's some sample output of the above program:
+.IP
 .EX
-.PP
 $ ./example-positionals 
 ERROR: Expected at least 2 positional arguments, aborting.
-.PP
+.EE
+.IP
+.EX
 $ ./example-positionals "the first" "the second"
-first positional=the first
-second positional=the second
+positional[0]=the first
+positional[1]=the second
 .EE
 .SH SEE ALSO
 .PP

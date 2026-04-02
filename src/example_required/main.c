@@ -8,7 +8,7 @@ int main(int argc, const char * argv[]) {
     // what arguments to expect
     struct cla * cla = CLA_create();
 
-    // define a few required arguments
+    // define a few required named arguments
     CLA_add_required(cla, "--nsamples", "-n");
     CLA_add_required(cla, "--freq", nullptr);
     CLA_add_required(cla, nullptr, "-f");
@@ -16,7 +16,7 @@ int main(int argc, const char * argv[]) {
     // parse the command line arguments and store the result in `cla`
     CLA_parse(cla, argc, argv);
 
-    // print the value of each positional argument
+    // print the value of each required named argument
     fprintf(stdout,
            "--nsamples/-n=%s\n",
            CLA_get_value_required(cla, "--nsamples"));

@@ -1,20 +1,76 @@
 .TH CLA_create 3
 .SH NAME
+.PP
 CLA_create \- Allocate memory necessary for argument classification
 .SH LIBRARY
+.PP
 cla (\fIlibcla\fR, \fI\-lcla\fR)
 .SH SYNOPSIS
+.PP
 .B #include \[dq]cla/cla.h\[dq]
-.br
+.PP
 \fBstruct cla * CLA_create (void);
 .SH DESCRIPTION
+.PP
 .B CLA_create
-allocates memory necessary for parsing command line arguments into flags, required arguments,
-optional arguments, positional arguments, and values.
+allocates memory necessary for parsing command line arguments into flags, required named arguments,
+optional named arguments, positional arguments, and values.
 
 .SH RETURN VALUE
+.PP
 A pointer to the abstract object required for command line argument parsing.
 The user is responsible for freeing the memory allocated by \fBCLA_create\fR using
 \fBCLA_destroy\fR.
+.SH EXAMPLES
+.PP
+The code example below represents a program that expects exactly two positional arguments, which it
+prints when the program is invoked. 
+.IP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main (int argc, const char * argv[]) {
+    // create the command line arguments object
+    struct cla * cla = CLA_create();
+
+    // specify that the program will have exactly 2
+    // positional arguments
+    CLA_add_positionals(cla, 2);
+
+    // parse the arguments that the user provided
+    CLA_parse(cla, argc, argv);
+
+    // print the value of the first positional
+    fprintf(stdout, "positional[0] = %s\\n",
+            CLA_get_value_positional(cla, 0));
+
+    // print the value of the second positional
+    fprintf(stdout, "positional[1] = %s\\n",
+            CLA_get_value_positional(cla, 1));
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Here's some sample output of the above program:
+.IP
+.EX
+$ ./example-positional
+ERROR: Expected at least 2 positional arguments, aborting.
+.EE
+.IP
+.EX
+$ ./example-positional first second
+positional[0] = first
+positional[1] = second
+.EE
 .SH SEE ALSO
+.PP
 \fBCLA\fR(3), \fBCLA_destroy\fR(3)

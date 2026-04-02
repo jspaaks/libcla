@@ -8,7 +8,7 @@ int main(int argc, const char * argv[]) {
     // what arguments to expect
     struct cla * cla = CLA_create();
 
-    // define a few optional arguments
+    // define a few optional named arguments
     CLA_add_optional(cla, "--directory", "-d");
     CLA_add_optional(cla, "--author", nullptr);
     CLA_add_optional(cla, nullptr, "-l");
@@ -16,7 +16,7 @@ int main(int argc, const char * argv[]) {
     // parse the command line arguments and store the result in `cla`
     CLA_parse(cla, argc, argv);
 
-    // print the value of each optional argument, if it was used at all
+    // print the value of each optional named argument, if it was used at all
     if (CLA_has_optional(cla, "--directory")) {
         fprintf(stdout,
                 "--directory/--d=%s\n",
