@@ -17,24 +17,24 @@ elseif(UNIX)
     list(APPEND CMAKE_INSTALL_RPATH $ORIGIN/../lib)
 endif()
 
-add_library(tgt_lib_kwargs SHARED)
+add_executable(tgt_exe_example_required)
 
-set_property(TARGET tgt_lib_kwargs PROPERTY OUTPUT_NAME kwargs)
+set_property(TARGET tgt_exe_example_required PROPERTY OUTPUT_NAME example-required)
 
 target_compile_definitions(
-    tgt_lib_kwargs
+    tgt_exe_example_required
     PRIVATE
         $<$<CONFIG:Debug>:DEBUG>
 )
 
 target_compile_features(
-    tgt_lib_kwargs
+    tgt_exe_example_required
     PRIVATE
         c_std_23
 )
 
 target_compile_options(
-    tgt_lib_kwargs
+    tgt_exe_example_required
     PRIVATE
         -Wall
         -Wextra
@@ -45,26 +45,21 @@ target_compile_options(
 )
 
 target_include_directories(
-    tgt_lib_kwargs
+    tgt_exe_example_required
     PRIVATE
         ${PROJECT_ROOT}/include
 )
 
-target_sources(
-    tgt_lib_kwargs
+target_link_libraries(
+    tgt_exe_example_required
     PRIVATE
-        ${PROJECT_ROOT}/src/kwargs/kwargs.c
-        ${PROJECT_ROOT}/src/kwargs/protected.c
-    PUBLIC
-        FILE_SET fset_lib_kwargs_headers
-        TYPE HEADERS
-        BASE_DIRS
-            ${PROJECT_ROOT}/include
-        FILES
-            ${PROJECT_ROOT}/include/kwargs/kwargs.h
+        tgt_lib_cla
 )
 
-install(TARGETS tgt_lib_kwargs
-    LIBRARY
-    FILE_SET fset_lib_kwargs_headers
+target_sources(
+    tgt_exe_example_required
+    PRIVATE
+        ${PROJECT_ROOT}/src/example_required/main.c
 )
+
+install(TARGETS tgt_exe_example_required)

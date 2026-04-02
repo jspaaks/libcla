@@ -1,0 +1,110 @@
+.TH CLA_get_value_required 3
+.SH NAME
+.PP
+CLA_get_value_required \- Get the value associated with a required named argument
+.SH LIBRARY
+.PP
+cla library (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBconst char * CLA_get_value_required (const struct cla * \fIself\fR\B, const char * \fIname\fR\fB);
+.SH DESCRIPTION
+.PP
+.B CLA_get_value_required
+gets the value associated with a required named argument \fIname\fR, using the
+classification information from \fIself\fR.
+.PP
+.I self
+can be constructed using
+\fBCLA_create\fR.
+.I name
+can be either the argument's name or its alias, see \fBCLA_add_required\fR(3).
+.SH RETURN VALUE
+.PP
+A pointer to \fIname\fR's value. Any subsequent parsing is left to the user. 
+.SH EXAMPLES
+.PP
+The code example below represents a program that expects three required named arguments: one that
+can be referenced through its name \[dq]--nsamples\[dq] and its alias \[dq]-n\[dq]; one that can be
+referenced only through its name \[dq]--freq\[dq]; and one that can be referenced only through
+its alias \[dq]-f\[dq]. For each required named argument, the program prints the corresponding
+value as supplied by the user during invocation of the program.
+.IP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, const char * argv[]) {
+
+    // allocate dynamic memory to store information about
+    // what arguments to expect
+    struct cla * cla = CLA_create();
+
+    // define a few required named arguments
+    CLA_add_required(cla, "--nsamples", "-n");
+    CLA_add_required(cla, "--freq", nullptr);
+    CLA_add_required(cla, nullptr, "-f");
+
+    // parse the command line arguments and store the result in `cla`
+    CLA_parse(cla, argc, argv);
+
+    // print the value of each required named argument
+    fprintf(stdout,
+           "--nsamples/-n=%s\\n",
+           CLA_get_value_required(cla, "--nsamples"));
+
+    fprintf(stdout,
+           "--freq=%s\\n",
+           CLA_get_value_required(cla, "--freq"));
+
+    fprintf(stdout,
+           "-f=%s\\n",
+           CLA_get_value_required(cla, "-f"));
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Here's some sample output of the above program:
+.IP
+.EX
+$ ./example-required
+ERROR: Required key '-n/--nsamples' not found, aborting.
+.EE
+.IP
+.EX
+$ ./example-required --nsamples
+ERROR: '--nsamples' requires a value but none given, aborting.
+.EE
+.IP
+.EX
+$ ./example-required --nsamples 12
+ERROR: Required key '--freq' not found, aborting.
+.EE
+.IP
+.EX
+$ ./example-required --nsamples 12 --freq 11000
+ERROR: Required key '-f' not found, aborting.
+.EE
+.IP
+.EX
+$ ./example-required --nsamples 12 --freq 11000 -f file.wav
+--nsamples/-n=12
+--freq=11000
+-f=file.wav
+.EE
+.IP
+.EX
+$ ./example-required --nsamples 12 --freq 11000 -f file.wav -n 23
+ERROR: Found multiple usages of key '-n/--nsamples', aborting.
+.EE
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_create\fR(3), \fBCLA_add_required\fR(3)

@@ -1,0 +1,71 @@
+.TH CLA_add_positionals 3
+.SH NAME
+.PP
+CLA_add_positionals \- Register the number of positional arguments
+.SH LIBRARY
+.PP
+cla (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBvoid CLA_add_positional (struct cla * self, int npositionals);
+.SH DESCRIPTION
+.PP
+Register the number of positionals \fInpositionals\fR.
+.PP
+\fInpositionals\fR should be a positive integer number.
+.SH EXAMPLES
+.PP
+The code example below represents a program that expects exactly two positional arguments, which it
+prints when the program is invoked. 
+.IP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, const char * argv[]) {
+
+    // allocate dynamic memory to store information about
+    // what arguments to expect
+    struct cla * cla = CLA_create();
+
+    // specify that the program will have exactly 2
+    // positional arguments
+    CLA_add_positionals(cla, 2);
+
+    // parse the arguments that the user provided
+    CLA_parse(cla, argc, argv);
+
+    // print the value of the first positional
+    fprintf(stdout, "positional[0] = %s\\n",
+            CLA_get_value_positional(cla, 0));
+
+    // print the value of the second positional
+    fprintf(stdout, "positional[1] = %s\\n",
+            CLA_get_value_positional(cla, 1));
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Here's some sample output of the above program:
+.IP
+.EX
+$ ./example-positionals 
+ERROR: Expected at least 2 positional arguments, aborting.
+.EE
+.IP
+.EX
+$ ./example-positionals "the first" "the second"
+positional[0]=the first
+positional[1]=the second
+.EE
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_get_value_positional\fR(3)

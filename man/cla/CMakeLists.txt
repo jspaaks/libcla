@@ -1,0 +1,20 @@
+include(GNUInstallDirs)
+install(
+    FILES
+        CLA_add_flag.3
+        CLA_add_optional.3
+        CLA_add_positionals.3
+        CLA_add_required.3
+        CLA_count_flag.3
+        CLA_create.3
+        CLA_destroy.3
+        CLA_get_value_optional.3
+        CLA_get_value_positional.3
+        CLA_get_value_required.3
+        CLA_has_flag.3
+        CLA_has_optional.3
+        CLA_parse.3
+        CLA_parsed_as.3
+        CLA.3
+    DESTINATION ${CMAKE_INSTALL_MANDIR}/man3     # I'd prefer to use TYPE instead of DESTINATION but it seems I need the man3 subdirectory
+)

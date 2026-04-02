@@ -1,0 +1,121 @@
+.TH CLA_get_value_optional 3
+.SH NAME
+.PP
+CLA_get_value_optional \- Get the value associated with an optional named argument
+.SH LIBRARY
+.PP
+cla library (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBconst char * CLA_get_value_optional (const struct cla * \fIself\fR\fB, const char * \fIname\fR\fB);
+.SH DESCRIPTION
+.PP
+.B CLA_get_value_optional
+gets the value associated with an optional named argument \fIname\fR, using the information from
+\fIself\fR.
+.PP
+.I self
+can be constructed using
+\fBCLA_create\fR.
+.PP
+.I name
+can be either the argument's name or its shorthand alias, see \fBCLA_add_optional\fR(3).
+.SH RETURN VALUE
+.PP
+A pointer to \fIname\fR's value. Any subsequent parsing is left to the user. 
+.SH EXAMPLES
+.PP
+The code example below represents a program that expects three optional named arguments: one that
+can be referenced through its name \[dq]--directory\[dq] and its alias \[dq]-d\[dq]; one that can be
+referenced only through its name \[dq]--author\[dq]; and one that can be referenced only through
+its alias \[dq]-l\[dq]. For each optional named argument that was used during invocation, the
+program prints the corresponding value.
+.IP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, const char * argv[]) {
+
+    // allocate dynamic memory to store information about
+    // what arguments to expect
+    struct cla * cla = CLA_create();
+
+    // define a few optional named arguments
+    CLA_add_optional(cla, "--directory", "-d");
+    CLA_add_optional(cla, "--author", nullptr);
+    CLA_add_optional(cla, nullptr, "-l");
+
+    // parse the command line arguments and store the result in `cla`
+    CLA_parse(cla, argc, argv);
+
+    // print the value of each optional named argument, if it was used at all
+    if (CLA_has_optional(cla, "--directory")) {
+        fprintf(stdout,
+                "--directory/--d=%s\\n",
+                CLA_get_value_optional(cla, "--directory"));
+    }
+
+    if (CLA_has_optional(cla, "-l")) {
+        fprintf(stdout,
+                "-l=%s\\n",
+                CLA_get_value_optional(cla, "-l"));
+    }
+
+    if (CLA_has_optional(cla, "--author")) {
+        fprintf(stdout,
+                "--author=%s\\n",
+                CLA_get_value_optional(cla, "--author"));
+    }
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Here's some sample output of the above program:
+.IP
+.EX
+$ ./example-optional
+.EE
+.IP
+.EX
+$ ./example-optional --directory
+ERROR: '--directory' requires a value but none given, aborting.
+.EE
+.IP
+.EX
+$ ./example-optional --directory the_directory
+--directory/--d=the_directory
+.EE
+.IP
+.EX
+$ ./example-optional --author the_author
+--author=the_author
+.EE
+.IP
+.EX
+$ ./example-optional -l the_length
+-l=the_length
+.EE
+.IP
+.EX
+$ ./example-optional --directory the_directory --author the_author -l
+ERROR: '-l' requires a value but none given, aborting.
+.EE
+.IP
+.EX
+$ ./example-optional --directory the_directory --author the_author -l the_length
+--directory/--d=the_directory
+-l=the_length
+--author=the_author
+.EE
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_create\fR(3), \fBCLA_add_optional\fR(3)

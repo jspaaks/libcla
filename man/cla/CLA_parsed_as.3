@@ -1,0 +1,144 @@
+.TH CLA_parsed_as 3
+.SH NAME
+.PP
+CLA_parsed_as \- Print how the user-provided arguments were understood by the program
+.SH LIBRARY
+.PP
+cla library (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBvoid CLA_parsed_as (const struct cla * \fIself\fR\fB, FILE * \fIstream\fR\fB);
+.SH DESCRIPTION
+.PP
+.B CLA_parsed_as
+uses
+.I stream
+to print a table of command line arguments received by the program,
+along with an indicator of how
+.B CLA_parse
+classified each argument provided by the user. Each argument is one of:
+.IP
+1. executable name
+.IP
+2. required named argument
+.IP
+3. optional named argument
+.IP
+4. flag argument
+.IP
+5. positional argument
+.IP
+6. value
+.PP
+.I self
+can be constructed using
+\fBCLA_create\fR.
+.SH EXAMPLES
+.PP
+The code example below represents a program that expects exactly one (unnamed) positional argument
+and exactly one required named argument (\[dq]--aa\[dq]/\[dq]-a\[dq]); it additionally expects an
+optional named argument (\[dq]--bb\[dq]/\[dq]-b\[dq]), and an (optional) flag
+(\[dq]--cc\[dq]/\[dq]-c\[dq]). The program prints its interpretation of each argument that the user
+provided during invocation.
+.IP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main (int argc, const char * argv[]) {
+    // create the command line arguments object
+    struct cla * cla = CLA_create();
+
+    // add a required named argument with a name and an alias
+    CLA_add_required(cla, "--aa", "-a");
+
+    // add an optional named argument with a name and an alias
+    CLA_add_optional(cla, "--bb", "-b");
+
+    // add a flag argument with a name and an alias
+    CLA_add_flag(cla, "--cc", "-c");
+
+    // specify that the program will have exactly 1
+    // positional argument
+    CLA_add_positionals(cla, 1);
+
+    // parse the arguments that the user provided
+    CLA_parse(cla, argc, argv);
+
+    // show how the program understood each of the user-provided arguments
+    CLA_parsed_as(cla, stdout);
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Here's some sample output of the above program:
+.IP
+.EX
+$ ./example-parse
+ERROR: Expected at least 1 positional arguments, aborting.
+.IP
+.EX
+$ ./example-parse positional-value-0
+ERROR: Required key '-a/--aa' not found, aborting.
+.IP
+.EX
+$ ./example-parse -a positional-value-0
+ERROR: '-a' requires a value but none given or not all positionals have been defined, aborting.
+.EE
+.IP
+.EX
+$ ./example-parse -a value-of--a positional-value-0
+User-provided arguments were parsed as follows:
+exename    ./example-parse
+required   -a
+value      value-of--a
+positional positional-value-0
+.EE
+.IP
+.EX
+$ ./example-parse -a value-of--a -b value-of--b positional-value-0
+User-provided arguments were parsed as follows:
+exename    ./example-parse
+required   -a
+value      value-of--a
+optional   -b
+value      value-of--b
+positional positional-value-0
+.EE
+.IP
+.EX
+$ ./example-parse -a value-of--a -b value-of--b -c positional-value-0
+User-provided arguments were parsed as follows:
+exename    ./example-parse
+required   -a
+value      value-of--a
+optional   -b
+value      value-of--b
+flag       -c
+positional positional-value-0
+.EE
+.IP
+.EX
+$ ./example-parse -a value-of--a -b value-of--b -c -c positional-value-0
+User-provided arguments were parsed as follows:
+exename    ./example-parse
+required   -a
+value      value-of--a
+optional   -b
+value      value-of--b
+flag       -c
+flag       -c
+positional positional-value-0
+.EE
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_create\fR(3), \fBCLA_parse\fR(3)

@@ -17,24 +17,24 @@ elseif(UNIX)
     list(APPEND CMAKE_INSTALL_RPATH $ORIGIN/../lib)
 endif()
 
-add_executable(tgt_exe_example_cla)
+add_executable(tgt_exe_example_flag)
 
-set_property(TARGET tgt_exe_example_cla PROPERTY OUTPUT_NAME example-cla)
+set_property(TARGET tgt_exe_example_flag PROPERTY OUTPUT_NAME example-flag)
 
 target_compile_definitions(
-    tgt_exe_example_cla
+    tgt_exe_example_flag
     PRIVATE
         $<$<CONFIG:Debug>:DEBUG>
 )
 
 target_compile_features(
-    tgt_exe_example_cla
+    tgt_exe_example_flag
     PRIVATE
         c_std_23
 )
 
 target_compile_options(
-    tgt_exe_example_cla
+    tgt_exe_example_flag
     PRIVATE
         -Wall
         -Wextra
@@ -45,21 +45,21 @@ target_compile_options(
 )
 
 target_include_directories(
-    tgt_exe_example_cla
+    tgt_exe_example_flag
     PRIVATE
         ${PROJECT_ROOT}/include
 )
 
 target_link_libraries(
-    tgt_exe_example_cla
+    tgt_exe_example_flag
     PRIVATE
         tgt_lib_cla
 )
 
 target_sources(
-    tgt_exe_example_cla
+    tgt_exe_example_flag
     PRIVATE
-        ${PROJECT_ROOT}/src/example/main.c
+        ${PROJECT_ROOT}/src/example_flag/main.c
 )
 
-install(TARGETS tgt_exe_example_cla)
+install(TARGETS tgt_exe_example_flag)
