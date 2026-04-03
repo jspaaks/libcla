@@ -1,22 +1,3 @@
-cmake_minimum_required(VERSION 3.23...3.28)
-
-set(PROJECT_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
-
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
-endif()
-
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE "${CMAKE_BINARY_DIR}/dist")
-endif()
-
-set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-if (APPLE)
-    list(APPEND CMAKE_INSTALL_RPATH @loader_path/../lib)
-elseif(UNIX)
-    list(APPEND CMAKE_INSTALL_RPATH $ORIGIN/../lib)
-endif()
-
 add_executable(tgt_exe_example_cla)
 
 set_property(TARGET tgt_exe_example_cla PROPERTY OUTPUT_NAME example-cla)
@@ -39,6 +20,7 @@ target_compile_options(
         -Wall
         -Wextra
         -pedantic
+        -fPIE
         $<$<CONFIG:Debug>:-g>
         $<$<CONFIG:Debug>:-O0>
         $<$<CONFIG:Release>:-Werror>
@@ -47,7 +29,7 @@ target_compile_options(
 target_include_directories(
     tgt_exe_example_cla
     PRIVATE
-        ${PROJECT_ROOT}/include
+        ../../include
 )
 
 target_link_libraries(
@@ -56,10 +38,16 @@ target_link_libraries(
         tgt_lib_cla
 )
 
+target_link_options(
+    tgt_exe_example_cla
+    PRIVATE
+        -pie
+)
+
 target_sources(
     tgt_exe_example_cla
     PRIVATE
-        ${PROJECT_ROOT}/src/example/main.c
+        main.c
 )
 
 install(TARGETS tgt_exe_example_cla)
