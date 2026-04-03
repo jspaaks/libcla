@@ -71,12 +71,13 @@ static void assert_key_is_used (const struct cla * self, int ikey, const char * 
 static void assert_name_is_compliant (const char * name);
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name);
 static void assert_required_keys_are_present (const struct cla * self);
-static void assert_token_not_repeated (struct cla * self, enum key_type type);
+static void assert_self_is_not_nullptr (const struct cla * self);
+static void assert_token_not_repeated (const struct cla * self, enum key_type type);
 static int find_key_by_name (const struct cla * self, const char * name);
 
 
 static void add_key (struct cla * self, const char * name, const char * alias, enum key_type type) {
-
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_not_been_parsed(self);
     assert_is_named(name, alias);
     assert_alias_is_compliant(alias);
@@ -153,6 +154,7 @@ static void assert_alias_is_compliant (const char * alias) {
 
 
 static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias) {
+    assert_self_is_not_nullptr(self);
     if (alias == nullptr) return;
     if (find_key_by_name(self, alias) != -1) {
         fprintf(stderr, "ERROR: alias \"%s\" already exists, aborting.\n", alias);
@@ -162,6 +164,7 @@ static void assert_alias_isnt_duplicate (const struct cla * self, const char * a
 
 
 static void assert_arguments_have_been_parsed (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     if (self->isfinal == false) {
         fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
         exit(EXIT_FAILURE);
@@ -170,6 +173,7 @@ static void assert_arguments_have_been_parsed (const struct cla * self) {
 
 
 static void assert_arguments_have_not_been_parsed (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     if (self->isfinal == true) {
         fprintf(stderr, "ERROR: arguments have already been parsed, aborting.\n");
         exit(EXIT_FAILURE);
@@ -194,6 +198,7 @@ static void assert_key_exists (int ikey, const char * name) {
 
 
 static void assert_key_is_of_type (const struct cla * self, int ikey, const char * name, enum key_type type) {
+    assert_self_is_not_nullptr(self);
     const char * key_type_names[KEY_TYPE_COUNT] = {
         [KEY_TYPE_REQUIRED] = "a required argument",
         [KEY_TYPE_OPTIONAL] = "an optional argument",
@@ -207,6 +212,7 @@ static void assert_key_is_of_type (const struct cla * self, int ikey, const char
 
 
 static void assert_key_is_used (const struct cla * self, int ikey, const char * name) {
+    assert_self_is_not_nullptr(self);
     if (self->keys.items[ikey].noccurrences == 0) {
         fprintf(stderr, "ERROR: '%s' is valid but it hasn't been used, aborting.\n", name);
         exit(EXIT_FAILURE);
@@ -243,6 +249,7 @@ static void assert_name_is_compliant (const char * name) {
 
 
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     if (name == nullptr) return;
     if (find_key_by_name(self, name) != -1) {
         fprintf(stderr, "ERROR: name \"%s\" already exists, aborting.\n", name);
@@ -252,6 +259,7 @@ static void assert_name_isnt_duplicate (const struct cla * self, const char * na
 
 
 static void assert_required_keys_are_present (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     for (struct key * key = &self->keys.items[0];
         key < &self->keys.items[self->keys.len];
         key++) {
@@ -288,7 +296,15 @@ static void assert_required_keys_are_present (const struct cla * self) {
 }
 
 
-static void assert_token_not_repeated (struct cla * self, enum key_type type) {
+static void assert_self_is_not_nullptr (const struct cla * self) {
+    if (self == nullptr) {
+        fprintf(stderr, "ERROR: struct cla * can't be used uninitialized, aborting.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+static void assert_token_not_repeated (const struct cla * self, enum key_type type) {
+    assert_self_is_not_nullptr(self);
     for (struct key * key = &self->keys.items[0];
          key < &self->keys.items[self->keys.len];
          key++) {
@@ -308,27 +324,32 @@ static void assert_token_not_repeated (struct cla * self, enum key_type type) {
 
 
 void CLA_add_flag (struct cla * self, const char * name, const char * alias) {
+    assert_self_is_not_nullptr(self);
     add_key(self, name, alias, KEY_TYPE_FLAG);
 }
 
 
 void CLA_add_optional (struct cla * self, const char * name, const char * alias) {
+    assert_self_is_not_nullptr(self);
     add_key(self, name, alias, KEY_TYPE_OPTIONAL);
 }
 
 
 void CLA_add_positionals (struct cla * self, int npositionals) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_not_been_parsed(self);
     self->npositionals = npositionals;
 }
 
 
 void CLA_add_required (struct cla * self, const char * name, const char * alias) {
+    assert_self_is_not_nullptr(self);
     add_key(self, name, alias, KEY_TYPE_REQUIRED);
 }
 
 
 int CLA_count_flag (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
@@ -395,6 +416,7 @@ void CLA_destroy (struct cla ** self) {
 
 
 const char * CLA_get_value_optional (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
@@ -410,6 +432,7 @@ const char * CLA_get_value_optional (const struct cla * self, const char * name)
 
 
 const char * CLA_get_value_positional (const struct cla * self, int ipos) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     if (ipos < 0) {
         fprintf(stderr, "ERROR: Can't use a negative index to retrieve a positional argument, aborting.\n");
@@ -425,6 +448,7 @@ const char * CLA_get_value_positional (const struct cla * self, int ipos) {
 
 
 const char * CLA_get_value_required (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
@@ -441,6 +465,7 @@ const char * CLA_get_value_required (const struct cla * self, const char * name)
 
 
 bool CLA_has_flag (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
@@ -450,6 +475,7 @@ bool CLA_has_flag (const struct cla * self, const char * name) {
 
 
 bool CLA_has_optional (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
@@ -459,7 +485,7 @@ bool CLA_has_optional (const struct cla * self, const char * name) {
 
 
 void CLA_parse (struct cla * self, int argc, const char * argv[]) {
-
+    assert_self_is_not_nullptr(self);
     errno = 0;
     self->tokens = (struct tokens) {
         .cap = argc,
@@ -539,6 +565,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 
 
 void CLA_parsed_as (const struct cla * self, FILE * stream) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     const char * typenames[] = {
         [TOKEN_TYPE_ERR] = "error",
@@ -558,6 +585,7 @@ void CLA_parsed_as (const struct cla * self, FILE * stream) {
 
 
 static int find_key_by_name (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     if (name == nullptr) return -1;
     for (int ikey = 0; ikey < self->keys.len; ikey++) {
         struct key * key = &self->keys.items[ikey];
