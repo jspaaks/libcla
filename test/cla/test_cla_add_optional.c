@@ -28,6 +28,18 @@ Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=tea
     CLA_add_optional(cla, "--sample", "-s");
 }
 
+// Test what happens when calling CLA_add_optional after command line arguments have been parsed
+
+Test(CLA_add_optional, __LINE__, .exit_code=9, .init=setup, .fini=teardown,
+    .description="Passing `CLA_add_optional` valid input after parsing the command line arguments should fail with the correct error id") {
+    int argc = 1;
+    const char * argv[] = {
+        "exename"
+    };
+    CLA_parse(cla, argc, argv);
+    CLA_add_optional(cla, "--sample", "-s");
+}
+
 // Tests related to combinations of arguments `name` and `alias`
 
 Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
