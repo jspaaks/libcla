@@ -35,7 +35,7 @@ target_compile_options(
 target_include_directories(
     tgt_lib_cla
     PRIVATE
-        ${PROJECT_ROOT}/include
+        ../../include
 )
 
 target_sources(
