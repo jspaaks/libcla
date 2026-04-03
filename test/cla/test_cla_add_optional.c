@@ -128,7 +128,7 @@ Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=tea
 }
 
 Test(CLA_add_optional, __LINE__, .exit_code=5, .init=setup, .fini=teardown,
-    .description="Passing `CLA_add_optional` a alias that doesn't start with `-` should fail with the correct error id") {
+    .description="Passing `CLA_add_optional` an alias that doesn't start with `-` should fail with the correct error id") {
     CLA_add_optional(cla, nullptr, "aa");
 }
 
@@ -143,11 +143,11 @@ Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=tea
 }
 
 Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Passing `CLA_add_optional` a alias consisting only of a number should pass") {
+    .description="Passing `CLA_add_optional` an alias consisting only of a number should pass") {
     CLA_add_optional(cla, nullptr, "-1");
 }
 
 Test(CLA_add_optional, __LINE__, .exit_code=6, .init=setup, .fini=teardown,
-    .description="Passing `CLA_add_optional` a alias containing non-alphanumeric characters should fail") {
+    .description="Passing `CLA_add_optional` an alias containing non-alphanumeric characters should fail") {
     CLA_add_optional(cla, nullptr, "-!");
 }
