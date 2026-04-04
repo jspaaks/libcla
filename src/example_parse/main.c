@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 int main (int argc, const char * argv[]) {
     // create the command line arguments object
     struct cla * cla = CLA_create();
@@ -22,6 +21,18 @@ int main (int argc, const char * argv[]) {
 
     // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
+
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        fprintf(stdout, "Usage: example-parse [OPTIONALS] POSITIONAL\n"
+                        "\n"
+                        "  Valid option names:\n"
+                        "    --aa, -a\n"
+                        "    --bb, -b\n"
+                        "    --cc, -c\n"
+                        "\n");
+        exit(EXIT_SUCCESS);
+    }
 
     // show how the program understood each of the user-provided arguments
     CLA_parsed_as(cla, stdout);

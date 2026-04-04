@@ -16,6 +16,15 @@ int main(int argc, const char * argv[]) {
     // parse the command line arguments and store the result in `cla`
     CLA_parse(cla, argc, argv);
 
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        fprintf(stdout, "Valid option names:\n"
+                        "    --directory, -d\n"
+                        "    --author\n"
+                        "    -l\n");
+        exit(EXIT_SUCCESS);
+    }
+
     // print the value of each optional named argument, if it was used at all
     if (CLA_has_optional(cla, "--directory")) {
         fprintf(stdout,

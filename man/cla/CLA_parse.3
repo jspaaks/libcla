@@ -72,6 +72,16 @@ int main (int argc, const char * argv[]) {
     // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
 
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        fprintf(stdout, "Usage: example-parse [OPTIONALS] POSITIONAL\\n"
+                        "  Valid option names:\\n"
+                        "    --aa, -a\\n"
+                        "    --bb, -b\\n"
+                        "    --cc, -c\\n");
+        exit(EXIT_SUCCESS);
+    }
+
     // show how the program understood each of the user-provided arguments
     CLA_parsed_as(cla, stdout);
 
@@ -88,10 +98,22 @@ Here's some sample output of the above program:
 .EX
 $ ./example-parse
 ERROR: Expected at least 1 positional arguments, aborting.
+.EE
+.IP
+.EX
+$ ./example-parse -h
+Usage: example-parse [OPTIONALS] POSITIONAL
+
+  Valid option names:
+    --aa, -a
+    --bb, -b
+    --cc, -c
+.EE
 .IP
 .EX
 $ ./example-parse positional-value-0
 ERROR: Required key '-a/--aa' not found, aborting.
+.EE
 .IP
 .EX
 $ ./example-parse -a positional-value-0

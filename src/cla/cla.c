@@ -53,6 +53,7 @@ struct tokens {
 // implementation of opaque type from the API
 struct cla {
     bool isfinal;
+    bool help_requested;
     struct keys keys;
     int npositionals;
     struct tokens tokens;
@@ -62,6 +63,7 @@ struct cla {
 static void add_key (struct cla * cla, const char * name, const char * alias, enum key_type type);
 static void assert_alias_is_compliant (const char * alias);
 static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias);
+static void assert_alias_isnt_h (const char * alias);
 static void assert_arguments_have_been_parsed (const struct cla * self);
 static void assert_arguments_have_not_been_parsed (const struct cla * self);
 static void assert_is_named (const char * name, const char * alias);
@@ -70,6 +72,7 @@ static void assert_key_is_of_type (const struct cla * self, int ikey, const char
 static void assert_key_is_used (const struct cla * self, int ikey, const char * name);
 static void assert_name_is_compliant (const char * name);
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name);
+static void assert_name_isnt_help (const char * name);
 static void assert_required_keys_are_present (const struct cla * self);
 static void assert_self_is_not_nullptr (const struct cla * self);
 static void assert_token_not_repeated (const struct cla * self, enum key_type type);
@@ -80,8 +83,10 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
     assert_self_is_not_nullptr(self);
     assert_arguments_have_not_been_parsed(self);
     assert_is_named(name, alias);
+    assert_alias_isnt_h(alias);
     assert_alias_is_compliant(alias);
     assert_alias_isnt_duplicate(self, alias);
+    assert_name_isnt_help(name);
     assert_name_is_compliant(name);
     assert_name_isnt_duplicate(self, name);
 
@@ -159,6 +164,15 @@ static void assert_alias_isnt_duplicate (const struct cla * self, const char * a
     if (find_key_by_name(self, alias) != -1) {
         fprintf(stderr, "ERROR: alias \"%s\" already exists, aborting.\n", alias);
         exit(7);
+    }
+}
+
+
+static void assert_alias_isnt_h (const char * alias) {
+    if (alias == nullptr) return;
+    if (strcmp(alias, "-h") == 0) {
+        fprintf(stderr, "ERROR: Adding illegal alias \"%s\" would override accessing help, aborting.\n", alias);
+        exit(32);
     }
 }
 
@@ -254,6 +268,24 @@ static void assert_name_isnt_duplicate (const struct cla * self, const char * na
 }
 
 
+static void assert_name_isnt_help (const char * name) {
+    if (name == nullptr) return;
+    if (strcmp(name, "--help") == 0) {
+        fprintf(stderr, "ERROR: Adding illegal name \"%s\" would override accessing help, aborting.\n", name);
+        exit(33);
+    }
+}
+
+
+static void assert_no_help_requested (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    if (self->help_requested) {
+        fprintf(stderr, "ERROR: Unhandled help request, aborting.\n");
+        exit(34);
+    }
+}
+
+
 static void assert_required_keys_are_present (const struct cla * self) {
     assert_self_is_not_nullptr(self);
     for (struct key * key = &self->keys.items[0];
@@ -344,6 +376,7 @@ void CLA_add_required (struct cla * self, const char * name, const char * alias)
 int CLA_count_flag (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
@@ -408,9 +441,17 @@ void CLA_destroy (struct cla ** self) {
 }
 
 
+const char * CLA_get_exename (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    assert_arguments_have_been_parsed(self);
+    return self->tokens.items[0].str;
+}
+
+
 const char * CLA_get_value_optional (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
@@ -427,6 +468,7 @@ const char * CLA_get_value_optional (const struct cla * self, const char * name)
 const char * CLA_get_value_positional (const struct cla * self, int ipos) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     if (ipos < 0) {
         fprintf(stderr, "ERROR: Can't use a negative index to retrieve a positional argument, aborting.\n");
         exit(25);
@@ -443,6 +485,7 @@ const char * CLA_get_value_positional (const struct cla * self, int ipos) {
 const char * CLA_get_value_required (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_REQUIRED);
@@ -460,6 +503,7 @@ const char * CLA_get_value_required (const struct cla * self, const char * name)
 bool CLA_has_flag (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
@@ -470,6 +514,7 @@ bool CLA_has_flag (const struct cla * self, const char * name) {
 bool CLA_has_optional (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
@@ -477,8 +522,17 @@ bool CLA_has_optional (const struct cla * self, const char * name) {
 }
 
 
+bool CLA_help_requested (struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    assert_arguments_have_been_parsed(self);
+    return self->help_requested;
+}
+
+
 void CLA_parse (struct cla * self, int argc, const char * argv[]) {
     assert_self_is_not_nullptr(self);
+
+    // allocate space for token array self->tokens
     errno = 0;
     self->tokens = (struct tokens) {
         .cap = argc,
@@ -504,6 +558,17 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
     // the first token is always the executable name
     self->tokens.items[0].type = TOKEN_TYPE_EXENAME;
     self->tokens.items[0].ikey = -1;
+
+    // forgo further parsing if the user merely asked for help
+    if (argc == 2) {
+        bool a = strcmp(argv[1], "-h") == 0;
+        bool b = strcmp(argv[1], "--help") == 0;
+        if (a || b) {
+            self->help_requested = true;
+            self->isfinal = true;
+            return;
+        }
+    }
 
     // iterate over the non-positionals: flags, requireds, optionals
     int ipos0 = argc - self->npositionals;
@@ -560,6 +625,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 void CLA_parsed_as (const struct cla * self, FILE * stream) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     const char * typenames[] = {
         [TOKEN_TYPE_ERR] = "error",
         [TOKEN_TYPE_REQUIRED] = "required",
