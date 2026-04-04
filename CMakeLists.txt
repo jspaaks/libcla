@@ -29,10 +29,12 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # I'm the top-most project
     option(CLA_BUILD_EXAMPLES "Whether to build the libcla examples" ON)
     option(CLA_BUILD_TESTING "Whether to build the libcla tests" ${BUILD_TESTING})
+    option(CLA_BUILD_TESTING_REDIRECT_STDERR "Whether to redirect stderr in the libcla tests" ${BUILD_TESTING})
 else()
     # I'm not the top-most project, use CLA_BUILD_EXAMPLES as-is
     option(CLA_BUILD_EXAMPLES "Whether to build the libcla examples" OFF)
     option(CLA_BUILD_TESTING "Whether to build the libcla tests" OFF)
+    option(CLA_BUILD_TESTING_REDIRECT_STDERR "Whether to redirect stderr in the libcla tests" OFF)
 endif()
 if (CLA_BUILD_EXAMPLES)
     add_subdirectory(src/example)

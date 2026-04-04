@@ -7,9 +7,10 @@ struct cla * cla = nullptr;
 
 void setup (void) {
     cla = CLA_create();
-
+#ifdef CLA_BUILD_TESTING_REDIRECT_STDERR
     // avoid printing the stderr messages (make sure to catch exit codes in the tests though)
     cr_redirect_stderr();  
+#endif // CLA_BUILD_TESTING_REDIRECT_STDERR
 }
 
 void teardown (void) {
@@ -18,9 +19,9 @@ void teardown (void) {
 
 // Tests related to argument `self`
 
-Test(CLA_add_optional, __LINE__, .exit_code=21, .init=cr_redirect_stderr,
+Test(CLA_add_optional, __LINE__, .exit_code=21, .init=setup, .fini=teardown,
     .description="Passing `CLA_add_optional` an uninitialized `struct cla * self` should fail with the correct error id") {
-    CLA_add_optional(cla, "--sample", "-s");
+    CLA_add_optional(nullptr, "--sample", "-s");
 }
 
 Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,

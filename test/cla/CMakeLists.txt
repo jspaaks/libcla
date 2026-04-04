@@ -6,6 +6,7 @@ target_compile_definitions(
     tgt_exe_test_cla
     PRIVATE
         $<$<CONFIG:Debug>:DEBUG>
+        $<$<BOOL:${CLA_BUILD_TESTING_REDIRECT_STDERR}>:-DCLA_BUILD_TESTING_REDIRECT_STDERR>
 )
 
 target_compile_features(

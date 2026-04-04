@@ -31,7 +31,14 @@ building can be controlled by explicitly setting the beforementioned variable, e
 cmake -DCLA_BUILD_EXAMPLES=ON ..
 ```
 
-<!--
+### CMake variables
+
+| CMake variable                     | Description                            |
+|---                                 | ---                                    |
+|`CLA_BUILD_EXAMPLES`                | Build the CLA examples                 |
+|`CLA_BUILD_TESTING_REDIRECT_STDERR` | Redirect stderr in the tests           |
+|`CLA_BUILD_TESTING`                 | Build the CLA tests                    |
+
 ## Testing
 
 Building and running the tests require that [Criterion](https://github.com/Snaipe/Criterion) is installed on the system, e.g. with
@@ -43,7 +50,7 @@ $ sudo apt install libcriterion-dev
 Run the tests with
 
 ```console
-$ ./dist/bin/test_kwargs -j1 --verbose
+$ ./dist/bin/test-cla -j1 --verbose
 ```
 
 Or simply,
@@ -51,5 +58,3 @@ Or simply,
 ```console
 $ ctest
 ```
-
--->
