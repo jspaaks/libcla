@@ -71,11 +71,17 @@ int main (int argc, const char * argv[]) {
 
     // handle help requests
     if (CLA_help_requested(cla)) {
-        fprintf(stdout, "Usage: example-parse [OPTIONALS] POSITIONAL\\n"
-                        "  Valid option names:\\n"
-                        "    --aa, -a\\n"
-                        "    --bb, -b\\n"
-                        "    --cc, -c\\n");
+        fprintf(stdout, "Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL\\n"
+                        "\\n"
+                        "  Requireds:\\n"
+                        "    --aa, -a     ... description ...\\n"
+                        "\\n"
+                        "  Optionals:\\n"
+                        "    --bb, -b     ... description ...\\n"
+                        "\\n"
+                        "  Flags:\\n"
+                        "    --cc, -c     ... description ...\\n"
+                        "\\n");
         exit(EXIT_SUCCESS);
     }
 
@@ -98,13 +104,18 @@ ERROR: Expected at least 1 positional arguments, aborting.
 .EE
 .IP
 .EX
-$ ./example-parse -h
-Usage: example-parse [OPTIONALS] POSITIONAL
+$ ./example-parse --help
+Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL
 
-  Valid option names:
-    --aa, -a
-    --bb, -b
-    --cc, -c
+  Requireds:
+    --aa, -a     ... description ...
+
+  Optionals:
+    --bb, -b     ... description ...
+
+  Flags:
+    --cc, -c     ... description ...
+
 .EE
 .IP
 .EX

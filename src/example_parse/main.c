@@ -24,12 +24,16 @@ int main (int argc, const char * argv[]) {
 
     // handle help requests
     if (CLA_help_requested(cla)) {
-        fprintf(stdout, "Usage: example-parse [OPTIONALS] POSITIONAL\n"
+        fprintf(stdout, "Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL\n"
                         "\n"
-                        "  Valid option names:\n"
-                        "    --aa, -a\n"
-                        "    --bb, -b\n"
-                        "    --cc, -c\n"
+                        "  Requireds:\n"
+                        "    --aa, -a     ... description ...\n"
+                        "\n"
+                        "  Optionals:\n"
+                        "    --bb, -b     ... description ...\n"
+                        "\n"
+                        "  Flags:\n"
+                        "    --cc, -c     ... description ...\n"
                         "\n");
         exit(EXIT_SUCCESS);
     }

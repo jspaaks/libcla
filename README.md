@@ -32,11 +32,13 @@ For instructions on building, see [`README.dev.md`](README.dev.md).
 - `CLA_count_flag.3`
 - `CLA_create.3`
 - `CLA_destroy.3`
+- `CLA_get_exename.3`
 - `CLA_get_value_optional.3`
 - `CLA_get_value_positional.3`
 - `CLA_get_value_required.3`
 - `CLA_has_flag.3`
 - `CLA_has_optional.3`
+- `CLA_help_requested.3`
 - `CLA_parse.3`
 - `CLA_parsed_as.3`
 
@@ -49,7 +51,6 @@ For instructions on building, see [`README.dev.md`](README.dev.md).
 #include "cla/cla.h"
 #include <stdio.h>
 #include <stdlib.h>
-
 
 int main (int argc, const char * argv[]) {
     // create the command line arguments object
@@ -71,6 +72,22 @@ int main (int argc, const char * argv[]) {
     // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
 
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        fprintf(stdout, "Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL\n"
+                        "\n"
+                        "  Requireds:\n"
+                        "    --aa, -a     ... description ...\n"
+                        "\n"
+                        "  Optionals:\n"
+                        "    --bb, -b     ... description ...\n"
+                        "\n"
+                        "  Flags:\n"
+                        "    --cc, -c     ... description ...\n"
+                        "\n");
+        exit(EXIT_SUCCESS);
+    }
+
     // show how the program understood each of the user-provided arguments
     CLA_parsed_as(cla, stdout);
 
@@ -79,6 +96,7 @@ int main (int argc, const char * argv[]) {
 
     // exit
     return EXIT_SUCCESS;
+}
 ```
 
 Let's see how that works in practice:
@@ -106,7 +124,22 @@ required   -a
 value      value-of--a
 positional positional-value-0
 ```
-It works! But we haven't tried with the optional arguments yet:
+It works! But we haven't tried with the optional arguments yet. Let's see what options we have:
+```console
+$ ./example-parse --help
+Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL
+
+  Requireds:
+    --aa, -a     ... description ...
+
+  Optionals:
+    --bb, -b     ... description ...
+
+  Flags:
+    --cc, -c     ... description ...
+
+```
+
 ```console
 $ ./example-parse -a value-of--a -b value-of--b -c --cc positional-value-0
 User-provided arguments were parsed as follows:
