@@ -174,3 +174,9 @@ Test(CLA_add_optional, __LINE__, .exit_code=6, .init=setup, .fini=teardown,
     .description="Passing `CLA_add_optional` an alias containing non-alphanumeric characters should fail with the correct exit code") {
     CLA_add_optional(cla, nullptr, "-!");
 }
+
+Test(CLA_add_optional, __LINE__, .exit_code=7, .init=setup, .fini=teardown,
+    .description="Passing `CLA_add_optional` the same alias twice should fail with the correct exit code") {
+    CLA_add_optional(cla, nullptr, "-a");
+    CLA_add_optional(cla, nullptr, "-a");
+}
