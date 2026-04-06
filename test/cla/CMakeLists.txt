@@ -51,6 +51,7 @@ target_sources(
     PRIVATE
         test_cla_add_flag.c
         test_cla_add_optional.c
+        test_cla_add_required.c
 )
 
 add_test(
