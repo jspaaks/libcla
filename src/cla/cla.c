@@ -260,7 +260,7 @@ static void assert_name_is_compliant (const char * name) {
         fprintf(stderr, "ERROR %d: name \"%s\" should be at most 64 characters, aborting.\n", code, name);
         exit(code);
     }
-    if (name[0] != '-' && name[1] != '-') {
+    if (name[0] != '-' || name[1] != '-') {
         const int code = 17;
         fprintf(stderr, "ERROR %d: name \"%s\" should start with \"--\", aborting.\n", code, name);
         exit(code);
