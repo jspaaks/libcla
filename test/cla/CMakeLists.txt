@@ -49,7 +49,7 @@ target_link_options(
 target_sources(
     tgt_exe_test_cla
     PRIVATE
-        #test_cla_add_flag.c
+        test_cla_add_flag.c
         test_cla_add_optional.c
 )
 
