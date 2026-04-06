@@ -416,7 +416,7 @@ struct cla * CLA_create (void) {
         exit(code);
     }
 
-    int cap = 8;
+    int cap = 8;  // arbitrarily start with capacity 8
     errno = 0;
     self->keys = (struct keys) {
         .cap = cap,
