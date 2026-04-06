@@ -88,8 +88,12 @@ Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=tea
 }
 
 Test(CLA_add_optional, __LINE__, .exit_code=17, .init=setup, .fini=teardown,
-    .description="Passing `CLA_add_optional` a name that doesn't start with `--` should fail with the correct exit code") {
+    .description="Passing `CLA_add_optional` a name whose 1st character isn't `-` should fail with the correct exit code") {
     CLA_add_optional(cla, "aaaa", nullptr);
+}
+
+Test(CLA_add_optional, __LINE__, .exit_code=17, .init=setup, .fini=teardown,
+    .description="Passing `CLA_add_optional` a name whose 2nd character isn't `-` should fail with the correct exit code") {
     CLA_add_optional(cla, "-aaa", nullptr);
 }
 
