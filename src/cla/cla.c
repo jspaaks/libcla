@@ -157,7 +157,7 @@ static void assert_alias_is_compliant (const char * alias) {
     }
     if (!isalnum(alias[1])) {
         const int code = 6;
-        fprintf(stderr, "ERROR %d: alias \"%s\" character at index 1 should\n"
+        fprintf(stderr, "ERROR %d: alias \"%s\" character at index 1 should "
                         "be [0-9a-zA-Z], aborting.\n", code, alias);
         exit(code);
     }
