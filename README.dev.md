@@ -50,6 +50,11 @@ $ sudo apt install libcriterion-dev
 Run the tests with
 
 ```console
+# run only test CLA_add_optional::99
+$ ./dist/bin/test-cla -j1 --verbose --filter CLA_add_optional/99
+# run only tests from suite CLA_add_optional
+$ ./dist/bin/test-cla -j1 --verbose --filter CLA_add_optional/*
+# run only tests from suite CLA_add_optional
 $ ./dist/bin/test-cla -j1 --verbose
 ```
 
