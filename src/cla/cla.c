@@ -73,6 +73,8 @@ static void assert_key_is_used (const struct cla * self, int ikey, const char * 
 static void assert_name_is_compliant (const char * name);
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name);
 static void assert_name_isnt_help (const char * name);
+static void assert_npositionals_hasnt_been_set (const struct cla * self);
+static void assert_npositionals_positive (int npositionals);
 static void assert_required_keys_are_present (const struct cla * self);
 static void assert_self_is_not_nullptr (const struct cla * self);
 static void assert_token_not_repeated (const struct cla * self, enum key_type type);
@@ -307,6 +309,25 @@ static void assert_no_help_requested (const struct cla * self) {
 }
 
 
+static void assert_npositionals_hasnt_been_set (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    if (self->npositionals != 0) {
+        const int code = 16;
+        fprintf(stderr, "ERROR %d: positionals was set to %d already, aborting.\n", code, self->npositionals);
+        exit(code);
+    }
+}
+
+
+static void assert_npositionals_positive (int npositionals) {
+    if (npositionals < 0) {
+        const int code = 35;
+        fprintf(stderr, "ERROR %d: number of positionals needs to be positive integer, aborting.\n", code);
+        exit(code);
+    }
+}
+
+
 static void assert_required_keys_are_present (const struct cla * self) {
     assert_self_is_not_nullptr(self);
     for (struct key * key = &self->keys.items[0];
@@ -387,6 +408,8 @@ void CLA_add_optional (struct cla * self, const char * name, const char * alias)
 void CLA_add_positionals (struct cla * self, int npositionals) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_not_been_parsed(self);
+    assert_npositionals_hasnt_been_set(self);
+    assert_npositionals_positive(npositionals);
     self->npositionals = npositionals;
 }
 
