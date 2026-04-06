@@ -130,7 +130,7 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
     if (alias != nullptr) {
         char * tmp = calloc(strlen(alias) + 1, sizeof(char));
         if (tmp == nullptr) {
-            const int code  = 3;
+            const int code = 3;
             fprintf(stderr, "%s\nERROR %d: Could not allocate memory for alias %d, aborting.\n", strerror(errno), code, *i);
             exit(code);
         }
