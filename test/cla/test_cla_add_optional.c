@@ -3,9 +3,11 @@
 #include <criterion/redirect.h>
 #include <stdlib.h>   // EXIT_SUCCESS
 
-struct cla * cla = nullptr;
+static void setup (void);
+static void teardown (void);
+static struct cla * cla = nullptr;
 
-void setup (void) {
+static void setup (void) {
     cla = CLA_create();
 #ifdef CLA_BUILD_TESTING_REDIRECT_STDERR
     // avoid printing the stderr messages (make sure to catch exit codes in the tests though)
@@ -13,7 +15,7 @@ void setup (void) {
 #endif // CLA_BUILD_TESTING_REDIRECT_STDERR
 }
 
-void teardown (void) {
+static void teardown (void) {
     CLA_destroy(&cla);
 }
 
