@@ -98,7 +98,7 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=13, .init=setup, .fini=teardow
 // - alias
 
 Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` with a name to determine whether an optional named argument defined by name and alias was used should return the named argument's value if the argument was used by its correct name") {
+    .description="Calling `CLA_get_value_optional` with a name to retrieve the value of an optional named argument defined by name and alias  should return the named argument's value if the argument was used by its correct name") {
     int argc = 3;
     const char * argv[] = {
         "exename",
@@ -113,7 +113,7 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fi
 }
 
 Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` with a name to determine whether an optional named argument defined by name and alias was used should return the named argument's value if the argument was used by its correct alias") {
+    .description="Calling `CLA_get_value_optional` with a name to retrieve the value of an optional named argument defined by name and alias should return the named argument's value if the argument was used by its correct alias") {
     int argc = 3;
     const char * argv[] = {
         "exename",
@@ -128,7 +128,7 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fi
 }
 
 Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` with a name to determine whether an optional named argument defined by name only was used should return the named argument's value if the argument was used by its correct name") {
+    .description="Calling `CLA_get_value_optional` with a name to retrieve the value of an optional named argument defined by name only should return the named argument's value if the argument was used by its correct name") {
     int argc = 3;
     const char * argv[] = {
         "exename",
@@ -143,7 +143,7 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fi
 }
 
 Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` with an alias to determine whether an optional named argument defined by name and alias was used should return the named argument's value if the argument was used by its correct name") {
+    .description="Calling `CLA_get_value_optional` with an alias to retrieve the value of an optional named argument defined by name and alias should return the named argument's value if the argument was used by its correct name") {
     int argc = 3;
     const char * argv[] = {
         "exename",
@@ -158,7 +158,7 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fi
 }
 
 Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` with an alias to determine whether an optional named argument defined by name and alias was used should return the named argument's value if the argument was used by its correct alias") {
+    .description="Calling `CLA_get_value_optional` with an alias to retrieve the value of an optional named argument defined by name and alias should return the named argument's value if the argument was used by its correct alias") {
     int argc = 3;
     const char * argv[] = {
         "exename",
@@ -173,7 +173,7 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fi
 }
 
 Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` with an alias to determine whether an optional named argument defined by alias only was used should return the named argument's value if the argument was used by its correct alias") {
+    .description="Calling `CLA_get_value_optional` with an alias to retrieve the value of an optional named argument defined by alias only should return the named argument's value if the argument was used by its correct alias") {
     int argc = 3;
     const char * argv[] = {
         "exename",
