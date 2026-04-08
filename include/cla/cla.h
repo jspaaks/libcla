@@ -5,7 +5,6 @@
 
 // forward declaration of abstract data type `struct cla` holding
 // information about the command line arguments
-typedef struct cla Cla;
 struct cla;
 
 CLA_EXPORT void CLA_add_flag (struct cla * self, const char * name, const char * alias);
