@@ -36,19 +36,50 @@ Test(CLA_get_value_optional, __LINE__, .exit_code=8, .init=setup, .fini=teardown
     CLA_get_value_optional(cla, "--aa");
 }
 
-Test(CLA_get_value_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
-    .description="Calling `CLA_get_value_optional` to determine whether an optional named argument defined by name and alias was used should return the named argument's value if the argument was used by its correct name") {
+Test(CLA_get_value_optional, __LINE__, .exit_code=34, .init=setup, .fini=teardown,
+    .description="Calling `CLA_get_value_optional` while help has been requested should fail with the correct exit code") {
+    int argc = 2;
+    const char * argv[] = {
+        "exename",
+        "--help"
+    };
+    CLA_add_optional(cla, "--aa", nullptr);
+    CLA_parse(cla, argc, argv);
+    CLA_get_value_optional(cla, "--aa");
+}
+
+Test(CLA_get_value_optional, __LINE__, .exit_code=11, .init=setup, .fini=teardown,
+    .description="Calling `CLA_get_value_optional` with unknown named argument should fail with the correct exit code") {
+    int argc = 1;
+    const char * argv[] = {
+        "exename"
+    };
+    CLA_parse(cla, argc, argv);
+    CLA_get_value_optional(cla, "--aa");
+}
+
+Test(CLA_get_value_optional, __LINE__, .exit_code=12, .init=setup, .fini=teardown,
+    .description="Calling `CLA_get_value_optional` with known named argument of the wrong type should fail with the correct exit code") {
     int argc = 3;
     const char * argv[] = {
         "exename",
         "--aa",
         "value-of-aa"
     };
-    CLA_add_optional(cla, "--aa", "-a");
+    CLA_add_required(cla, "--aa", nullptr);
     CLA_parse(cla, argc, argv);
-    char * actual = (char *) CLA_get_value_optional(cla, "--aa");
-    char * expected = "value-of-aa";
-    cr_assert_str_eq(actual, expected);
+    CLA_get_value_optional(cla, "--aa");
+}
+
+Test(CLA_get_value_optional, __LINE__, .exit_code=13, .init=setup, .fini=teardown,
+    .description="Calling `CLA_get_value_optional` with known named argument of the correct type should fail with the correct exit code if the argument isn't used") {
+    int argc = 1;
+    const char * argv[] = {
+        "exename"
+    };
+    CLA_add_optional(cla, "--aa", nullptr);
+    CLA_parse(cla, argc, argv);
+    CLA_get_value_optional(cla, "--aa");
 }
 
 // This next section is combinatorial:
