@@ -54,6 +54,7 @@ target_sources(
         test_cla_add_positionals.c
         test_cla_add_required.c
         test_cla_count_flag.c
+        test_cla_get_exename.c
 )
 
 add_test(
