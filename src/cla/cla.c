@@ -304,7 +304,7 @@ static void assert_name_isnt_help (const char * name) {
 static void assert_name_isnt_nullptr (const char * name) {
     if (name == nullptr) {
         const int code = 36;
-        fprintf(stderr, "ERROR %d: Name is nullptr, aborting.\n", code);
+        fprintf(stderr, "ERROR %d: `name` is nullptr, aborting.\n", code);
         exit(code);
     }
 }
