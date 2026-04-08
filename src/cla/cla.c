@@ -406,11 +406,13 @@ static void assert_token_not_repeated (const struct cla * self, enum key_type ty
 
 
 void CLA_add_flag (struct cla * self, const char * name, const char * alias) {
+    // delegate asserts to add_key
     add_key(self, name, alias, KEY_TYPE_FLAG);
 }
 
 
 void CLA_add_optional (struct cla * self, const char * name, const char * alias) {
+    // delegate asserts to add_key
     add_key(self, name, alias, KEY_TYPE_OPTIONAL);
 }
 
@@ -425,6 +427,7 @@ void CLA_add_positionals (struct cla * self, int npositionals) {
 
 
 void CLA_add_required (struct cla * self, const char * name, const char * alias) {
+    // delegate asserts to add_key
     add_key(self, name, alias, KEY_TYPE_REQUIRED);
 }
 
