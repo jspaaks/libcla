@@ -53,6 +53,7 @@ target_sources(
         test_cla_add_optional.c
         test_cla_add_positionals.c
         test_cla_add_required.c
+        test_cla_count_flag.c
 )
 
 add_test(
