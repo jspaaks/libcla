@@ -586,7 +586,7 @@ bool CLA_has_flag (const struct cla * self, const char * name) {
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
-    return CLA_count_flag(self, name) > 0;
+    return self->keys.items[ikey].noccurrences > 0;
 }
 
 
