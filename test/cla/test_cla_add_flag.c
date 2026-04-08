@@ -11,7 +11,7 @@ static void setup (void) {
     cla = CLA_create();
 #ifdef CLA_BUILD_TESTING_REDIRECT_STDERR
     // avoid printing the stderr messages (make sure to catch exit codes in the tests though)
-    cr_redirect_stderr();  
+    cr_redirect_stderr();
 #endif // CLA_BUILD_TESTING_REDIRECT_STDERR
 }
 
