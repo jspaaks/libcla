@@ -78,6 +78,7 @@ static void assert_npositionals_hasnt_been_set (const struct cla * self);
 static void assert_npositionals_positive (int npositionals);
 static void assert_required_keys_are_present (const struct cla * self);
 static void assert_self_is_not_nullptr (const struct cla * self);
+static void assert_stream_isnt_nullptr (FILE * stream);
 static void assert_token_not_repeated (const struct cla * self, enum key_type type);
 static int find_key_by_name (const struct cla * self, const char * name);
 
@@ -383,6 +384,16 @@ static void assert_self_is_not_nullptr (const struct cla * self) {
         exit(code);
     }
 }
+
+
+static void assert_stream_isnt_nullptr (FILE * stream) {
+    if (stream == nullptr) {
+        const int code = 37;
+        fprintf(stderr, "ERROR %d: `stream` is nullptr, aborting.\n", code);
+        exit(code);
+    }
+}
+
 
 static void assert_token_not_repeated (const struct cla * self, enum key_type type) {
     assert_self_is_not_nullptr(self);
@@ -700,6 +711,7 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 
 void CLA_parsed_as (const struct cla * self, FILE * stream) {
     assert_self_is_not_nullptr(self);
+    assert_stream_isnt_nullptr(stream);
     assert_arguments_have_been_parsed(self);
     assert_no_help_requested(self);
     const char * typenames[] = {
