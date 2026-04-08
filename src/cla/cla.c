@@ -73,6 +73,7 @@ static void assert_key_is_used (const struct cla * self, int ikey, const char * 
 static void assert_name_is_compliant (const char * name);
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name);
 static void assert_name_isnt_help (const char * name);
+static void assert_name_isnt_nullptr (const char * name);
 static void assert_npositionals_hasnt_been_set (const struct cla * self);
 static void assert_npositionals_positive (int npositionals);
 static void assert_required_keys_are_present (const struct cla * self);
@@ -299,6 +300,15 @@ static void assert_name_isnt_help (const char * name) {
 }
 
 
+static void assert_name_isnt_nullptr (const char * name) {
+    if (name == nullptr) {
+        const int code = 36;
+        fprintf(stderr, "ERROR %d: Name is nullptr, aborting.\n", code);
+        exit(code);
+    }
+}
+
+
 static void assert_no_help_requested (const struct cla * self) {
     assert_self_is_not_nullptr(self);
     if (self->help_requested) {
@@ -421,6 +431,7 @@ void CLA_add_required (struct cla * self, const char * name, const char * alias)
 
 int CLA_count_flag (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
     assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
@@ -498,6 +509,7 @@ const char * CLA_get_exename (const struct cla * self) {
 
 const char * CLA_get_value_optional (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
     assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
@@ -534,6 +546,7 @@ const char * CLA_get_value_positional (const struct cla * self, int ipos) {
 
 const char * CLA_get_value_required (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
     assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
@@ -553,6 +566,7 @@ const char * CLA_get_value_required (const struct cla * self, const char * name)
 
 bool CLA_has_flag (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
     assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
@@ -564,6 +578,7 @@ bool CLA_has_flag (const struct cla * self, const char * name) {
 
 bool CLA_has_optional (const struct cla * self, const char * name) {
     assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
     assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
