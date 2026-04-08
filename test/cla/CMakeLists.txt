@@ -56,6 +56,7 @@ target_sources(
         test_cla_count_flag.c
         test_cla_get_exename.c
         test_cla_get_value_optional.c
+        test_cla_get_value_positional.c
         test_cla_get_value_required.c
 )
 
