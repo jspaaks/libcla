@@ -59,6 +59,7 @@ target_sources(
         test_cla_get_value_positional.c
         test_cla_get_value_required.c
         test_cla_has_flag.c
+        test_cla_has_optional.c
 )
 
 add_test(
