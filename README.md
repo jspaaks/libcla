@@ -154,6 +154,16 @@ positional positional-value-0
 ```
 Note that flags may be repeated, but required and optional named arguments can only appear once.
 
+## Alternatives
+
+There are many alternatives out there for parsing command line arguments. Here are some:
+
+1. https://github.com/cofyc/argparse?tab=readme-ov-file
+1. https://www.argtable.org/
+1. https://likle.github.io/cargs/
+1. https://michaeldipperstein.github.io/optlist.html
+1. https://www.dmulholl.com/docs/args/master/api.html
+
 ## Acknowledgements
 
 _This project was initialized using [Copier](https://pypi.org/project/copier)
