@@ -41,6 +41,41 @@ Test(CLA_has_flag, __LINE__, .exit_code=36, .init=setup, .fini=teardown,
     CLA_has_flag(cla, nullptr);
 }
 
+Test(CLA_has_flag, __LINE__, .exit_code=34, .init=setup, .fini=teardown,
+    .description="Calling `CLA_has_flag` while help has been requested should fail with the correct exit code") {
+    int argc = 2;
+    const char * argv[] = {
+        "exename",
+        "--help"
+    };
+    CLA_add_required(cla, "--aa", nullptr);
+    CLA_parse(cla, argc, argv);
+    CLA_has_flag(cla, "--aa");
+}
+
+Test(CLA_has_flag, __LINE__, .exit_code=11, .init=setup, .fini=teardown,
+    .description="Calling `CLA_has_flag` with an unknown named argument should fail with the correct exit code") {
+    int argc = 1;
+    const char * argv[] = {
+        "exename"
+    };
+    CLA_parse(cla, argc, argv);
+    CLA_has_flag(cla, "--aa");
+}
+
+Test(CLA_has_flag, __LINE__, .exit_code=12, .init=setup, .fini=teardown,
+    .description="Calling `CLA_has_flag` with a valid optional named argument should fail with the correct exit code") {
+    int argc = 3;
+    const char * argv[] = {
+        "exename",
+        "--aa",
+        "value-of-aa"
+    };
+    CLA_add_optional(cla, "--aa", nullptr);
+    CLA_parse(cla, argc, argv);
+    CLA_has_flag(cla, "--aa");
+}
+
 // This next section is combinatiorial:
 //
 // calling CLA_has_flag with
