@@ -56,34 +56,37 @@ int main (int argc, const char * argv[]) {
     // create the command line arguments object
     struct cla * cla = CLA_create();
 
-    // add a required named argument with a name and an alias
+    // register a required named argument with a name and an alias
     CLA_add_required(cla, "--aa", "-a");
 
-    // add an optional named argument with a name and an alias
+    // register an optional named argument with a name and an alias
     CLA_add_optional(cla, "--bb", "-b");
 
-    // add a flag argument with a name and an alias
+    // register a flag argument with a name and an alias
     CLA_add_flag(cla, "--cc", "-c");
 
-    // specify that the program will have exactly 1
-    // positional argument
-    CLA_add_positionals(cla, 1);
+    // specify that the program will have exactly 2 positional arguments
+    CLA_add_positionals(cla, 2);
 
     // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
 
     // handle help requests
     if (CLA_help_requested(cla)) {
-        fprintf(stdout, "Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL\n"
+        fprintf(stdout, "Usage: example-parse REQUIREDS [OPTIONALS] [FLAGS] POS0 POS1\n"
                         "\n"
                         "  Requireds:\n"
-                        "    --aa, -a     ... description ...\n"
+                        "    --aa, -a <VAL>     ... description ...\n"
                         "\n"
                         "  Optionals:\n"
-                        "    --bb, -b     ... description ...\n"
+                        "    --bb, -b <VAL>     ... description ...\n"
                         "\n"
                         "  Flags:\n"
-                        "    --cc, -c     ... description ...\n"
+                        "    --cc, -c           ... description ...\n"
+                        "\n"
+                        "  Positionals:\n"
+                        "    POS0               ... description ...\n"
+                        "    POS1               ... description ...\n"
                         "\n");
         exit(EXIT_SUCCESS);
     }
@@ -103,55 +106,72 @@ Let's see how that works in practice:
 
 ```console
 $ ./example-parse
-ERROR: Expected at least 1 positional argument, aborting.
+ERROR 30: Expected at least 2 positional arguments, aborting.
 ```
-OK, so add a value for the first positional argument:
+
+OK, so add a value for the positional arguments:
+
 ```console
-$ ./example-parse positional-value-0
-ERROR: Required key '-a/--aa' not found, aborting.
+$ ./example-parse pos0 pos1
+ERROR 20: Required key '-a/--aa' not found, aborting.
 ```
+
 Makes sense, our program above expects an argument named `-a` or `--aa`; let's add it then:
+
 ```console
-$ ./example-parse -a positional-value-0
-ERROR: '-a' requires a value but none given or not all positionals have been defined, aborting.
+$ ./example-parse -a pos0 pos1
+ERROR 31: '-a' requires a value but none given or not all positionals have been defined, aborting.
 ```
+
 Ah yes, `-a` is a key-value pair so it needs a value:
+
 ```console
-$ ./example-parse -a value-of--a positional-value-0
+$ ./example-parse -a value-of-a pos0 pos1
 User-provided arguments were parsed as follows:
 exename    ./example-parse
 required   -a
-value      value-of--a
-positional positional-value-0
+value      value-of-a
+positional pos0
+positional pos1
 ```
+
 It works! But we haven't tried with the optional arguments yet. Let's see what options we have:
+
 ```console
 $ ./example-parse --help
-Usage: example-parse REQUIREDS [OPTIONALS] POSITIONAL
+Usage: example-parse REQUIREDS [OPTIONALS] [FLAGS] POS0 POS1
 
   Requireds:
-    --aa, -a     ... description ...
+    --aa, -a <VAL>     ... description ...
 
   Optionals:
-    --bb, -b     ... description ...
+    --bb, -b <VAL>     ... description ...
 
   Flags:
-    --cc, -c     ... description ...
+    --cc, -c           ... description ...
+
+  Positionals:
+    POS0               ... description ...
+    POS1               ... description ...
 
 ```
 
+With optional named argument `--bb/-b` and flag `--cc/-c`:
+
 ```console
-$ ./example-parse -a value-of--a -b value-of--b -c --cc positional-value-0
+$ ./example-parse -a value-of-a -b value-of-b -c --cc pos0 pos1
 User-provided arguments were parsed as follows:
 exename    ./example-parse
 required   -a
-value      value-of--a
+value      value-of-a
 optional   -b
-value      value-of--b
+value      value-of-b
 flag       -c
 flag       --cc
-positional positional-value-0
+positional pos0
+positional pos1
 ```
+
 Note that flags may be repeated, but required and optional named arguments can only appear once.
 
 ## Alternatives
