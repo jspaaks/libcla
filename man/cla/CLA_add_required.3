@@ -49,6 +49,15 @@ int main(int argc, const char * argv[]) {
     // parse the command line arguments and store the result in `cla`
     CLA_parse(cla, argc, argv);
 
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        fprintf(stdout, "Valid option names:\\n"
+                        "    --nsamples, -n\\n"
+                        "    --freq\\n"
+                        "    -f\\n");
+        exit(EXIT_SUCCESS);
+    }
+
     // print the value of each required named argument
     fprintf(stdout,
            "--nsamples/-n=%s\\n",
@@ -75,6 +84,14 @@ Here's some sample output of the above program:
 .EX
 $ ./example-required
 ERROR: Required key '-n/--nsamples' not found, aborting.
+.EE
+.IP
+.EX
+$ ./example-required -h
+Valid option names:
+    --nsamples, -n
+    --freq
+    -f
 .EE
 .IP
 .EX

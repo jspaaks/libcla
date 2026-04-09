@@ -53,6 +53,7 @@ struct tokens {
 // implementation of opaque type from the API
 struct cla {
     bool isfinal;
+    bool help_requested;
     struct keys keys;
     int npositionals;
     struct tokens tokens;
@@ -62,6 +63,7 @@ struct cla {
 static void add_key (struct cla * cla, const char * name, const char * alias, enum key_type type);
 static void assert_alias_is_compliant (const char * alias);
 static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias);
+static void assert_alias_isnt_h (const char * alias);
 static void assert_arguments_have_been_parsed (const struct cla * self);
 static void assert_arguments_have_not_been_parsed (const struct cla * self);
 static void assert_is_named (const char * name, const char * alias);
@@ -70,17 +72,25 @@ static void assert_key_is_of_type (const struct cla * self, int ikey, const char
 static void assert_key_is_used (const struct cla * self, int ikey, const char * name);
 static void assert_name_is_compliant (const char * name);
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name);
+static void assert_name_isnt_help (const char * name);
+static void assert_name_isnt_nullptr (const char * name);
+static void assert_npositionals_hasnt_been_set (const struct cla * self);
+static void assert_npositionals_positive (int npositionals);
 static void assert_required_keys_are_present (const struct cla * self);
-static void assert_token_not_repeated (struct cla * self, enum key_type type);
+static void assert_self_is_not_nullptr (const struct cla * self);
+static void assert_stream_isnt_nullptr (FILE * stream);
+static void assert_token_not_repeated (const struct cla * self, enum key_type type);
 static int find_key_by_name (const struct cla * self, const char * name);
 
 
 static void add_key (struct cla * self, const char * name, const char * alias, enum key_type type) {
-
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_not_been_parsed(self);
     assert_is_named(name, alias);
+    assert_alias_isnt_h(alias);
     assert_alias_is_compliant(alias);
     assert_alias_isnt_duplicate(self, alias);
+    assert_name_isnt_help(name);
     assert_name_is_compliant(name);
     assert_name_isnt_duplicate(self, name);
 
@@ -89,8 +99,9 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
         errno = 0;
         self->keys.items = reallocarray(self->keys.items, self->keys.cap * 2, sizeof(struct key));
         if (self->keys.items == nullptr) {
-            fprintf(stderr, "%s\nERROR: Could not allocate memory for growing keys array, aborting.\n", strerror(errno));
-            exit(EXIT_FAILURE);
+            const int code = 1;
+            fprintf(stderr, "%s\nERROR %d: Could not allocate memory for growing keys array, aborting.\n", strerror(errno), code);
+            exit(code);
         }
         self->keys.cap *= 2;
         for (int i = self->keys.len; i < self->keys.cap; i++) {
@@ -111,8 +122,9 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
     if (name != nullptr) {
         char * tmp = calloc(strlen(name) + 1, sizeof(char));
         if (tmp == nullptr) {
-            fprintf(stderr, "%s\nERROR: Could not allocate memory for name %d, aborting.\n", strerror(errno), *i);
-            exit(EXIT_FAILURE);
+            const int code = 2;
+            fprintf(stderr, "%s\nERROR %d: Could not allocate memory for name %d, aborting.\n", strerror(errno), code, *i);
+            exit(code);
         }
         self->keys.items[*i].name = tmp;
         strcpy(self->keys.items[*i].name, name);
@@ -122,8 +134,9 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
     if (alias != nullptr) {
         char * tmp = calloc(strlen(alias) + 1, sizeof(char));
         if (tmp == nullptr) {
-            fprintf(stderr, "%s\nERROR: Could not allocate memory for alias %d, aborting.\n", strerror(errno), *i);
-            exit(EXIT_FAILURE);
+            const int code = 3;
+            fprintf(stderr, "%s\nERROR %d: Could not allocate memory for alias %d, aborting.\n", strerror(errno), code, *i);
+            exit(code);
         }
         self->keys.items[*i].alias = tmp;
         strcpy(self->keys.items[*i].alias, alias);
@@ -137,79 +150,104 @@ static void add_key (struct cla * self, const char * name, const char * alias, e
 static void assert_alias_is_compliant (const char * alias) {
     if (alias == nullptr) return;
     if (strnlen(alias, 3) != 2) {
-        fprintf(stderr, "ERROR: alias \"%s\" should be length 2, aborting.\n", alias);
-        exit(EXIT_FAILURE);
+        const int code = 4;
+        fprintf(stderr, "ERROR %d: alias \"%s\" should be length 2, aborting.\n", code, alias);
+        exit(code);
     }
     if (alias[0] != '-') {
-        fprintf(stderr, "ERROR: alias \"%s\" should start with \'-\', aborting.\n", alias);
-        exit(EXIT_FAILURE);
+        const int code = 5;
+        fprintf(stderr, "ERROR %d: alias \"%s\" should start with \'-\', aborting.\n", code, alias);
+        exit(code);
     }
     if (!isalnum(alias[1])) {
-        fprintf(stderr, "ERROR: alias \"%s\" character at index 1 should\n"
-                        "be [0-9a-zA-Z], aborting.\n", alias);
-        exit(EXIT_FAILURE);
+        const int code = 6;
+        fprintf(stderr, "ERROR %d: alias \"%s\" character at index 1 should "
+                        "be [0-9a-zA-Z], aborting.\n", code, alias);
+        exit(code);
     }
 }
 
 
 static void assert_alias_isnt_duplicate (const struct cla * self, const char * alias) {
+    assert_self_is_not_nullptr(self);
     if (alias == nullptr) return;
     if (find_key_by_name(self, alias) != -1) {
-        fprintf(stderr, "ERROR: alias \"%s\" already exists, aborting.\n", alias);
-        exit(EXIT_FAILURE);
+        const int code = 7;
+        fprintf(stderr, "ERROR %d: alias \"%s\" already exists, aborting.\n", code, alias);
+        exit(code);
+    }
+}
+
+
+static void assert_alias_isnt_h (const char * alias) {
+    if (alias == nullptr) return;
+    if (strcmp(alias, "-h") == 0) {
+        const int code = 32;
+        fprintf(stderr, "ERROR %d: Adding illegal alias \"%s\" would override accessing help, aborting.\n", code, alias);
+        exit(code);
     }
 }
 
 
 static void assert_arguments_have_been_parsed (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     if (self->isfinal == false) {
-        fprintf(stderr, "ERROR: arguments haven't been parsed yet, aborting.\n");
-        exit(EXIT_FAILURE);
+        const int code = 8;
+        fprintf(stderr, "ERROR %d: arguments haven't been parsed yet, aborting.\n", code);
+        exit(code);
     }
 }
 
 
 static void assert_arguments_have_not_been_parsed (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     if (self->isfinal == true) {
-        fprintf(stderr, "ERROR: arguments have already been parsed, aborting.\n");
-        exit(EXIT_FAILURE);
+        const int code = 9;
+        fprintf(stderr, "ERROR %d: arguments have already been parsed, aborting.\n", code);
+        exit(code);
     }
 }
 
 
 static void assert_is_named (const char * name, const char * alias) {
     if (name == nullptr && alias == nullptr) {
-        fprintf(stderr, "ERROR: Can't add an unnamed option, aborting.\n");
-        exit(EXIT_FAILURE);
+        const int code = 10;
+        fprintf(stderr, "ERROR %d: Can't add an unnamed option, aborting.\n", code);
+        exit(code);
     }
 }
 
 
 static void assert_key_exists (int ikey, const char * name) {
     if (ikey == -1) {
-        fprintf(stderr, "ERROR: Unknown argument name '%s', aborting.\n", name);
-        exit(EXIT_FAILURE);
+        const int code = 11;
+        fprintf(stderr, "ERROR %d: Unknown argument name '%s', aborting.\n", code, name);
+        exit(code);
     }
 }
 
 
 static void assert_key_is_of_type (const struct cla * self, int ikey, const char * name, enum key_type type) {
+    assert_self_is_not_nullptr(self);
     const char * key_type_names[KEY_TYPE_COUNT] = {
         [KEY_TYPE_REQUIRED] = "a required argument",
         [KEY_TYPE_OPTIONAL] = "an optional argument",
         [KEY_TYPE_FLAG] = "a flag",
     };
     if (self->keys.items[ikey].type != type) {
-        fprintf(stderr, "ERROR: Key '%s' is not %s, aborting.\n", name, key_type_names[type]);
-        exit(EXIT_FAILURE);
+        const int code = 12;
+        fprintf(stderr, "ERROR %d: Key '%s' is not %s, aborting.\n", code, name, key_type_names[type]);
+        exit(code);
     }
 }
 
 
 static void assert_key_is_used (const struct cla * self, int ikey, const char * name) {
+    assert_self_is_not_nullptr(self);
     if (self->keys.items[ikey].noccurrences == 0) {
-        fprintf(stderr, "ERROR: '%s' is valid but it hasn't been used, aborting.\n", name);
-        exit(EXIT_FAILURE);
+        const int code = 13;
+        fprintf(stderr, "ERROR %d: '%s' is valid but it hasn't been used, aborting.\n", code, name);
+        exit(code);
     }
 }
 
@@ -217,41 +255,92 @@ static void assert_key_is_used (const struct cla * self, int ikey, const char * 
 static void assert_name_is_compliant (const char * name) {
     if (name == nullptr) return;
     if (strnlen(name, 4) <= 3) {
-        fprintf(stderr, "ERROR: name \"%s\" should be at least 4 characters, aborting.\n", name);
-        exit(EXIT_FAILURE);
+        const int code = 14;
+        fprintf(stderr, "ERROR %d: name \"%s\" should be at least 4 characters, aborting.\n", code, name);
+        exit(code);
     }
     if (strnlen(name, 65) > 64) {
-        fprintf(stderr, "ERROR: name \"%s\" should be at most 64 characters, aborting.\n", name);
-        exit(EXIT_FAILURE);
+        const int code = 15;
+        fprintf(stderr, "ERROR %d: name \"%s\" should be at most 64 characters, aborting.\n", code, name);
+        exit(code);
     }
-    if (name[0] != '-') {
-        fprintf(stderr, "ERROR: name \"%s\" should start with \"--\", aborting.\n", name);
-        exit(EXIT_FAILURE);
-    }
-    if (name[1] != '-') {
-        fprintf(stderr, "ERROR: name \"%s\" should start with \"--\", aborting.\n", name);
-        exit(EXIT_FAILURE);
+    if (name[0] != '-' || name[1] != '-') {
+        const int code = 17;
+        fprintf(stderr, "ERROR %d: name \"%s\" should start with \"--\", aborting.\n", code, name);
+        exit(code);
     }
     for (int i = 2; i < (int) strlen(name); i++) {
         if (!isalnum(name[i])) {
-            fprintf(stderr, "ERROR: name \"%s\" character at index %d should\n"
-                            "be [0-9a-zA-Z], aborting.\n", name, i);
-            exit(EXIT_FAILURE);
+            const int code = 18;
+            fprintf(stderr, "ERROR %d: name \"%s\" character at index %d should "
+                            "be [0-9a-zA-Z], aborting.\n", code, name, i);
+            exit(code);
         }
     }
 }
 
 
 static void assert_name_isnt_duplicate (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     if (name == nullptr) return;
     if (find_key_by_name(self, name) != -1) {
-        fprintf(stderr, "ERROR: name \"%s\" already exists, aborting.\n", name);
-        exit(EXIT_FAILURE);
+        const int code = 19;
+        fprintf(stderr, "ERROR %d: name \"%s\" already exists, aborting.\n", code, name);
+        exit(code);
+    }
+}
+
+
+static void assert_name_isnt_help (const char * name) {
+    if (name == nullptr) return;
+    if (strcmp(name, "--help") == 0) {
+        const int code = 33;
+        fprintf(stderr, "ERROR %d: Adding illegal name \"%s\" would override accessing help, aborting.\n", code, name);
+        exit(code);
+    }
+}
+
+
+static void assert_name_isnt_nullptr (const char * name) {
+    if (name == nullptr) {
+        const int code = 36;
+        fprintf(stderr, "ERROR %d: `name` is nullptr, aborting.\n", code);
+        exit(code);
+    }
+}
+
+
+static void assert_no_help_requested (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    if (self->help_requested) {
+        const int code = 34;
+        fprintf(stderr, "ERROR %d: Unhandled help request, aborting.\n", code);
+        exit(code);
+    }
+}
+
+
+static void assert_npositionals_hasnt_been_set (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    if (self->npositionals != 0) {
+        const int code = 16;
+        fprintf(stderr, "ERROR %d: positionals was set to %d already, aborting.\n", code, self->npositionals);
+        exit(code);
+    }
+}
+
+
+static void assert_npositionals_positive (int npositionals) {
+    if (npositionals < 0) {
+        const int code = 35;
+        fprintf(stderr, "ERROR %d: number of positionals needs to be positive integer, aborting.\n", code);
+        exit(code);
     }
 }
 
 
 static void assert_required_keys_are_present (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     for (struct key * key = &self->keys.items[0];
         key < &self->keys.items[self->keys.len];
         key++) {
@@ -274,62 +363,91 @@ static void assert_required_keys_are_present (const struct cla * self) {
             }
         }
         if (found == false) {
+            const int code = 20;
             if (key->name != nullptr && key->alias != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s/%s' not found, aborting.\n",
-                        key->alias, key->name);
+                fprintf(stderr, "ERROR %d: Required key '%s/%s' not found, aborting.\n", code, key->alias, key->name);
             } else if (key->name != nullptr) {
-                fprintf(stderr, "ERROR: Required key '%s' not found, aborting.\n", key->name);
+                fprintf(stderr, "ERROR %d: Required key '%s' not found, aborting.\n", code, key->name);
             } else {
-                fprintf(stderr, "ERROR: Required key '%s' not found, aborting.\n", key->alias);
+                fprintf(stderr, "ERROR %d: Required key '%s' not found, aborting.\n", code, key->alias);
             }
-            exit(EXIT_FAILURE);
+            exit(code);
         }
     }
 }
 
 
-static void assert_token_not_repeated (struct cla * self, enum key_type type) {
+static void assert_self_is_not_nullptr (const struct cla * self) {
+    if (self == nullptr) {
+        const int code = 21;
+        fprintf(stderr, "ERROR %d: struct cla * can't be used uninitialized, aborting.\n", code);
+        exit(code);
+    }
+}
+
+
+static void assert_stream_isnt_nullptr (FILE * stream) {
+    if (stream == nullptr) {
+        const int code = 37;
+        fprintf(stderr, "ERROR %d: `stream` is nullptr, aborting.\n", code);
+        exit(code);
+    }
+}
+
+
+static void assert_token_not_repeated (const struct cla * self, enum key_type type) {
+    assert_self_is_not_nullptr(self);
     for (struct key * key = &self->keys.items[0];
          key < &self->keys.items[self->keys.len];
          key++) {
 
         if (key->type == type && key->noccurrences > 1) {
+            const int code = 22;
             if (key->name != nullptr && key->alias != nullptr) {
-                fprintf(stderr, "ERROR: Found multiple usages of key '%s/%s', aborting.\n", key->alias, key->name);
+                fprintf(stderr, "ERROR %d: Found multiple usages of key '%s/%s', aborting.\n", code, key->alias, key->name);
             } else if (key->name != nullptr) {
-                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->name);
+                fprintf(stderr, "ERROR %d: Found multiple usages of key '%s', aborting.\n", code, key->name);
             } else {
-                fprintf(stderr, "ERROR: Found multiple usages of key '%s', aborting.\n", key->alias);
+                fprintf(stderr, "ERROR %d: Found multiple usages of key '%s', aborting.\n", code, key->alias);
             }
-            exit(EXIT_FAILURE);
+            exit(code);
         }
     }
 }
 
 
 void CLA_add_flag (struct cla * self, const char * name, const char * alias) {
+    // delegate asserts to add_key
     add_key(self, name, alias, KEY_TYPE_FLAG);
 }
 
 
 void CLA_add_optional (struct cla * self, const char * name, const char * alias) {
+    // delegate asserts to add_key
     add_key(self, name, alias, KEY_TYPE_OPTIONAL);
 }
 
 
 void CLA_add_positionals (struct cla * self, int npositionals) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_not_been_parsed(self);
+    assert_npositionals_hasnt_been_set(self);
+    assert_npositionals_positive(npositionals);
     self->npositionals = npositionals;
 }
 
 
 void CLA_add_required (struct cla * self, const char * name, const char * alias) {
+    // delegate asserts to add_key
     add_key(self, name, alias, KEY_TYPE_REQUIRED);
 }
 
 
 int CLA_count_flag (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
@@ -341,11 +459,12 @@ struct cla * CLA_create (void) {
     errno = 0;
     struct cla * self = calloc(1, sizeof(struct cla));
     if (self == nullptr) {
-        fprintf(stderr, "%s\nERROR: Could not allocate memory for instance of \"struct cla\", aborting.\n", strerror(errno));
-        exit(EXIT_FAILURE);
+        const int code = 23;
+        fprintf(stderr, "%s\nERROR %d: Could not allocate memory for instance of \"struct cla\", aborting.\n", strerror(errno), code);
+        exit(code);
     }
 
-    int cap = 8;
+    int cap = 8;  // arbitrarily start with capacity 8
     errno = 0;
     self->keys = (struct keys) {
         .cap = cap,
@@ -353,8 +472,9 @@ struct cla * CLA_create (void) {
         .len = 0,
     };
     if (self->keys.items == nullptr) {
-        fprintf(stderr, "%s\nERROR: Could not allocate memory for keys array, aborting.\n", strerror(errno));
-        exit(EXIT_FAILURE);
+        const int code = 24;
+        fprintf(stderr, "%s\nERROR %d: Could not allocate memory for keys array, aborting.\n", strerror(errno), code);
+        exit(code);
     }
 
     return self;
@@ -394,8 +514,18 @@ void CLA_destroy (struct cla ** self) {
 }
 
 
-const char * CLA_get_value_optional (const struct cla * self, const char * name) {
+const char * CLA_get_exename (const struct cla * self) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    return self->tokens.items[0].str;
+}
+
+
+const char * CLA_get_value_optional (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
+    assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
@@ -410,14 +540,18 @@ const char * CLA_get_value_optional (const struct cla * self, const char * name)
 
 
 const char * CLA_get_value_positional (const struct cla * self, int ipos) {
+    assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     if (ipos < 0) {
-        fprintf(stderr, "ERROR: Can't use a negative index to retrieve a positional argument, aborting.\n");
-        exit(EXIT_FAILURE);
+        const int code = 25;
+        fprintf(stderr, "ERROR %d: Can't use a negative index to retrieve a positional argument, aborting.\n", code);
+        exit(code);
     }
     if (ipos >= self->npositionals) {
-        fprintf(stderr, "ERROR: Requested positional argument does not exist, aborting.\n");
-        exit(EXIT_FAILURE);
+        const int code = 26;
+        fprintf(stderr, "ERROR %d: Requested positional argument does not exist, aborting.\n", code);
+        exit(code);
     }
     int i = self->tokens.len - self->npositionals + ipos;
     return self->tokens.items[i].str;
@@ -425,7 +559,10 @@ const char * CLA_get_value_positional (const struct cla * self, int ipos) {
 
 
 const char * CLA_get_value_required (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_REQUIRED);
@@ -435,22 +572,29 @@ const char * CLA_get_value_required (const struct cla * self, const char * name)
             return self->tokens.items[itoken + 1].str;
         }
     }
-    fprintf(stderr, "ERROR: Something went wrong retrieving the value of '%s', aborting.\n", name);
-    exit(EXIT_FAILURE);
+    const int code = 27;
+    fprintf(stderr, "ERROR %d: Something went wrong retrieving the value of '%s', aborting.\n", code, name);
+    exit(code);
 }
 
 
 bool CLA_has_flag (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_FLAG);
-    return CLA_count_flag(self, name) > 0;
+    return self->keys.items[ikey].noccurrences > 0;
 }
 
 
 bool CLA_has_optional (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
+    assert_name_isnt_nullptr(name);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     int ikey = find_key_by_name(self, name);
     assert_key_exists(ikey, name);
     assert_key_is_of_type(self, ikey, name, KEY_TYPE_OPTIONAL);
@@ -458,8 +602,17 @@ bool CLA_has_optional (const struct cla * self, const char * name) {
 }
 
 
-void CLA_parse (struct cla * self, int argc, const char * argv[]) {
+bool CLA_help_requested (struct cla * self) {
+    assert_self_is_not_nullptr(self);
+    assert_arguments_have_been_parsed(self);
+    return self->help_requested;
+}
 
+
+void CLA_parse (struct cla * self, int argc, const char * argv[]) {
+    assert_self_is_not_nullptr(self);
+
+    // allocate space for token array self->tokens
     errno = 0;
     self->tokens = (struct tokens) {
         .cap = argc,
@@ -467,8 +620,9 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
         .len = argc,
     };
     if (self->tokens.items == nullptr) {
-        fprintf(stderr, "%s\nERROR: Could not allocate memory for token array, aborting.\n", strerror(errno));
-        exit(EXIT_FAILURE);
+        const int code = 28;
+        fprintf(stderr, "%s\nERROR %d: Could not allocate memory for token array, aborting.\n", strerror(errno), code);
+        exit(code);
     }
 
     // copy contents of argv into self->tokens
@@ -476,8 +630,9 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
         int len = strlen(argv[i]) + 1;
         self->tokens.items[i].str = calloc(len, sizeof(char *));
         if (self->tokens.items[i].str == nullptr) {
-            fprintf(stderr, "%s\nError allocating memory for token string, aborting.\n", strerror(errno));
-            exit(EXIT_FAILURE);
+            const int code = 29;
+            fprintf(stderr, "%s\nERROR %d: allocating memory for token string, aborting.\n", strerror(errno), code);
+            exit(code);
         }
         strcpy(self->tokens.items[i].str, argv[i]);
     }
@@ -486,11 +641,25 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
     self->tokens.items[0].type = TOKEN_TYPE_EXENAME;
     self->tokens.items[0].ikey = -1;
 
+    // forgo further parsing if the user merely asked for help
+    if (argc == 2) {
+        bool a = strcmp(argv[1], "-h") == 0;
+        bool b = strcmp(argv[1], "--help") == 0;
+        if (a || b) {
+            self->help_requested = true;
+            self->isfinal = true;
+            return;
+        }
+    }
+
     // iterate over the non-positionals: flags, requireds, optionals
     int ipos0 = argc - self->npositionals;
     if (ipos0 < 1) {
-        fprintf(stderr, "ERROR: Expected at least %d positional argument%s, aborting.\n", self->npositionals, self->npositionals == 1 ? "" : "s");
-        exit(EXIT_FAILURE);
+        const int code = 30;
+        fprintf(stderr,
+                "ERROR %d: Expected at least %d positional argument%s, aborting.\n",
+                code, self->npositionals, self->npositionals == 1 ? "" : "s");
+        exit(code);
     }
     for (int itoken = 1; itoken < ipos0; itoken++) {
 
@@ -517,9 +686,11 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 
         if (itoken == ipos0 - 1) {
             if (token->type == TOKEN_TYPE_REQUIRED || token->type == TOKEN_TYPE_OPTIONAL) {
-                fprintf(stderr, "ERROR: '%s' requires a value but none given%s, aborting.\n",
-                        token->str, self->npositionals > 0 ? " or not all positionals have been defined" : "");
-                exit(EXIT_FAILURE);
+                const int code = 31;
+                fprintf(stderr,
+                        "ERROR %d: '%s' requires a value but none given%s, aborting.\n",
+                        code, token->str, self->npositionals > 0 ? " or not all positionals have been defined" : "");
+                exit(code);
             }
         }
     }
@@ -539,7 +710,10 @@ void CLA_parse (struct cla * self, int argc, const char * argv[]) {
 
 
 void CLA_parsed_as (const struct cla * self, FILE * stream) {
+    assert_self_is_not_nullptr(self);
+    assert_stream_isnt_nullptr(stream);
     assert_arguments_have_been_parsed(self);
+    assert_no_help_requested(self);
     const char * typenames[] = {
         [TOKEN_TYPE_ERR] = "error",
         [TOKEN_TYPE_REQUIRED] = "required",
@@ -558,6 +732,7 @@ void CLA_parsed_as (const struct cla * self, FILE * stream) {
 
 
 static int find_key_by_name (const struct cla * self, const char * name) {
+    assert_self_is_not_nullptr(self);
     if (name == nullptr) return -1;
     for (int ikey = 0; ikey < self->keys.len; ikey++) {
         struct key * key = &self->keys.items[ikey];

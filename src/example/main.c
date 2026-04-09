@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static void show_usage (const struct cla * cla, FILE * stream);
 
 int main (int argc, const char * argv[]) {
     // create the command line arguments object
@@ -39,6 +40,12 @@ int main (int argc, const char * argv[]) {
 
     // parse the arguments that the user provided
     CLA_parse(cla, argc, argv);
+
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        show_usage(cla, stdout);
+        exit(EXIT_SUCCESS);
+    }
 
     // retrieve value of required named arguments
     fprintf(stdout, "-a/--aa = %s\n", CLA_get_value_required(cla, "-a"));
@@ -80,4 +87,35 @@ int main (int argc, const char * argv[]) {
 
     // exit
     return EXIT_SUCCESS;
+}
+
+static void show_usage (const struct cla * cla, FILE * stream) {
+    const char * exename = CLA_get_exename(cla);
+    fprintf(stream, "Usage:\n");
+    fprintf(stream, "  %s -h\n", exename);
+    fprintf(stream, "  %s REQUIREDS [OPTIONALS] [FLAGS] POSITIONALS\n", exename);
+    fprintf(stream, "\n");
+    fprintf(stream, "  Requireds\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "    --aa, -a AAA          ...\n");
+    fprintf(stream, "    --bb BB               ...\n");
+    fprintf(stream, "    -c C                  ...\n");
+    fprintf(stream, "    \n");
+    fprintf(stream, "  Optionals\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "    --dd, -d DDD          ...\n");
+    fprintf(stream, "    --ee EE               ...\n");
+    fprintf(stream, "    -f F                  ...\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "  Flags\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "    --gg, -g              ...\n");
+    fprintf(stream, "    --hh                  ...\n");
+    fprintf(stream, "    -i                    ...\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "  Positionals\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "    FIRST                 ...\n");
+    fprintf(stream, "    SECOND                ...\n");
+    fprintf(stream, "\n");
 }

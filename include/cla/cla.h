@@ -5,7 +5,6 @@
 
 // forward declaration of abstract data type `struct cla` holding
 // information about the command line arguments
-typedef struct cla Cla;
 struct cla;
 
 CLA_EXPORT void CLA_add_flag (struct cla * self, const char * name, const char * alias);
@@ -15,11 +14,13 @@ CLA_EXPORT void CLA_add_required (struct cla * self, const char * name, const ch
 CLA_EXPORT int CLA_count_flag (const struct cla * self, const char * name);
 CLA_EXPORT struct cla * CLA_create (void);
 CLA_EXPORT void CLA_destroy (struct cla ** self);
+CLA_EXPORT const char * CLA_get_exename (const struct cla * self);
 CLA_EXPORT const char * CLA_get_value_optional (const struct cla * self, const char * name);
 CLA_EXPORT const char * CLA_get_value_positional (const struct cla * self, int ipos);
 CLA_EXPORT const char * CLA_get_value_required (const struct cla * self, const char * name);
 CLA_EXPORT bool CLA_has_flag (const struct cla * self, const char * name);
 CLA_EXPORT bool CLA_has_optional (const struct cla * self, const char * name);
+CLA_EXPORT bool CLA_help_requested (struct cla * self);
 CLA_EXPORT void CLA_parse (struct cla * self, int argc, const char * argv[]);
 CLA_EXPORT void CLA_parsed_as (const struct cla * self, FILE * stream);
 

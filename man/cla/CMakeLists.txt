@@ -1,4 +1,3 @@
-include(GNUInstallDirs)
 install(
     FILES
         CLA_add_flag.3
