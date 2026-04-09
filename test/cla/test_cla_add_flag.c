@@ -180,4 +180,3 @@ Test(CLA_add_flag, __LINE__, .exit_code=7, .init=setup, .fini=teardown,
     CLA_add_flag(cla, nullptr, "-a");
     CLA_add_flag(cla, nullptr, "-a");
 }
-
