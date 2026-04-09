@@ -57,6 +57,17 @@ Test(CLA_add_optional, __LINE__, .exit_code=22, .init=setup, .fini=teardown,
     CLA_parse(cla, argc, argv);
 }
 
+Test(CLA_add_optional, __LINE__, .exit_code=31, .init=setup, .fini=teardown,
+    .description="Named optional arguments require an associated value") {
+    int argc = 2;
+    const char * argv[] = {
+        "exename",
+        "--aa"
+    };
+    CLA_add_optional(cla, "--aa", "-a");
+    CLA_parse(cla, argc, argv);
+}
+
 // Tests related to combinations of arguments `name` and `alias`
 
 Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
