@@ -43,6 +43,18 @@ Test(CLA_add_flag, __LINE__, .exit_code=9, .init=setup, .fini=teardown,
     CLA_add_flag(cla, "--sample", "-s");
 }
 
+Test(CLA_add_flag, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
+    .description="Flags may be repeated") {
+    int argc = 3;
+    const char * argv[] = {
+        "exename",
+        "--aa",
+        "-a"
+    };
+    CLA_add_flag(cla, "--aa", "-a");
+    CLA_parse(cla, argc, argv);
+}
+
 // Tests related to combinations of arguments `name` and `alias`
 
 Test(CLA_add_flag, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,

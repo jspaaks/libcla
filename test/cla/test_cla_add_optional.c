@@ -43,6 +43,20 @@ Test(CLA_add_optional, __LINE__, .exit_code=9, .init=setup, .fini=teardown,
     CLA_add_optional(cla, "--sample", "-s");
 }
 
+Test(CLA_add_optional, __LINE__, .exit_code=22, .init=setup, .fini=teardown,
+    .description="Named optional arguments may not be repeated") {
+    int argc = 5;
+    const char * argv[] = {
+        "exename",
+        "--aa",
+        "value-of-aa",
+        "-a",
+        "value-of-a"
+    };
+    CLA_add_optional(cla, "--aa", "-a");
+    CLA_parse(cla, argc, argv);
+}
+
 // Tests related to combinations of arguments `name` and `alias`
 
 Test(CLA_add_optional, __LINE__, .exit_code=EXIT_SUCCESS, .init=setup, .fini=teardown,
