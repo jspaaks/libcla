@@ -48,7 +48,7 @@ Test(CLA_has_flag, __LINE__, .exit_code=34, .init=setup, .fini=teardown,
         "exename",
         "--help"
     };
-    CLA_add_required(cla, "--aa", nullptr);
+    CLA_add_flag(cla, "--aa", nullptr);
     CLA_parse(cla, argc, argv);
     CLA_has_flag(cla, "--aa");
 }
