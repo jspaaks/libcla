@@ -43,6 +43,16 @@ Test(CLA_add_positionals, __LINE__, .exit_code=9, .init=setup, .fini=teardown,
     CLA_add_positionals(cla, 2);
 }
 
+Test(CLA_add_positionals, __LINE__, .exit_code=30, .init=setup, .fini=teardown,
+    .description="Positionals require a value") {
+    int argc = 1;
+    const char * argv[] = {
+        "exename"
+    };
+    CLA_add_positionals(cla, 1);
+    CLA_parse(cla, argc, argv);
+}
+
 // Tests related to argument `npositionals`
 
 Test(CLA_add_positionals, __LINE__, .exit_code=35, .init=setup, .fini=teardown,
