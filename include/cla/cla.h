@@ -20,7 +20,7 @@ CLA_EXPORT const char * CLA_get_value_positional (const struct cla * self, int i
 CLA_EXPORT const char * CLA_get_value_required (const struct cla * self, const char * name);
 CLA_EXPORT bool CLA_has_flag (const struct cla * self, const char * name);
 CLA_EXPORT bool CLA_has_optional (const struct cla * self, const char * name);
-CLA_EXPORT bool CLA_help_requested (struct cla * self);
+CLA_EXPORT bool CLA_help_requested (const struct cla * self);
 CLA_EXPORT void CLA_parse (struct cla * self, int argc, const char * argv[]);
 CLA_EXPORT void CLA_parsed_as (const struct cla * self, FILE * stream);
 

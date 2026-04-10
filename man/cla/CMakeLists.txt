@@ -7,11 +7,13 @@ install(
         CLA_count_flag.3
         CLA_create.3
         CLA_destroy.3
+        CLA_get_exename.3
         CLA_get_value_optional.3
         CLA_get_value_positional.3
         CLA_get_value_required.3
         CLA_has_flag.3
         CLA_has_optional.3
+        CLA_help_requested.3
         CLA_parse.3
         CLA_parsed_as.3
         CLA.3

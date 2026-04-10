@@ -1,1 +1,26 @@
-TODO
+.TH CLA_get_exename 3
+.SH NAME
+.PP
+CLA_get_exename \- Get the name of the executable
+.SH LIBRARY
+.PP
+cla library (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBconst char * CLA_get_exename (const struct cla * \fIself\fR\fB);
+.SH DESCRIPTION
+.PP
+.B CLA_get_exename
+returns the name of the executable, including the relative path if there is one.
+.PP
+.I self
+can be constructed using
+\fBCLA_create\fR.
+.SH RETURN VALUE
+.PP
+Returns the name of the executable, including the relative path if there is one.
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_create\fR(3)
