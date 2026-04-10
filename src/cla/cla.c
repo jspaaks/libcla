@@ -602,7 +602,7 @@ bool CLA_has_optional (const struct cla * self, const char * name) {
 }
 
 
-bool CLA_help_requested (struct cla * self) {
+bool CLA_help_requested (const struct cla * self) {
     assert_self_is_not_nullptr(self);
     assert_arguments_have_been_parsed(self);
     return self->help_requested;
