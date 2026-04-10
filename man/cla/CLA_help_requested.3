@@ -1,1 +1,109 @@
-TODO
+.TH CLA_help_requested 3
+.SH NAME
+.PP
+CLA_help_requested \- Assess whether the user requested help
+.SH LIBRARY
+.PP
+cla library (\fIlibcla\fR, \fI\-lcla\fR)
+.SH SYNOPSIS
+.PP
+.B #include \[dq]cla/cla.h\[dq]
+.PP
+\fBbool CLA_help_requested (const struct cla * \fIself\fR\fB);
+.SH DESCRIPTION
+.PP
+.B CLA_help_requested
+assesses whether the user asked for help using the reserved \fB--help\fR option or its alias \fB-h\fR.
+.PP
+.I self
+can be constructed using
+\fBCLA_create\fR.
+.SH RETURN VALUE
+.PP
+Returns \fBtrue\fR if the user asked for help, otherwise \fBfalse\fR.
+.SH EXAMPLES
+The code example below represents a program that expects exactly two (unnamed) positional arguments
+and exactly one required named argument (\[dq]--aa\[dq]/\[dq]-a\[dq]); it additionally expects an
+optional named argument (\[dq]--bb\[dq]/\[dq]-b\[dq]), and an (optional) flag
+(\[dq]--cc\[dq]/\[dq]-c\[dq]). The program prints its interpretation of each argument that the user
+provided during invocation.
+.IP
+.EX
+#include "cla/cla.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main (int argc, const char * argv[]) {
+    // create the command line arguments object
+    struct cla * cla = CLA_create();
+
+    // register a required named argument with a name and an alias
+    CLA_add_required(cla, "--aa", "-a");
+
+    // register an optional named argument with a name and an alias
+    CLA_add_optional(cla, "--bb", "-b");
+
+    // register a flag argument with a name and an alias
+    CLA_add_flag(cla, "--cc", "-c");
+
+    // specify that the program will have exactly 2 positional arguments
+    CLA_add_positionals(cla, 2);
+
+    // parse the arguments that the user provided
+    CLA_parse(cla, argc, argv);
+
+    // handle help requests
+    if (CLA_help_requested(cla)) {
+        fprintf(stdout, "Usage: example-parse REQUIREDS [OPTIONALS] [FLAGS] POS0 POS1\\n"
+                        "\\n"
+                        "  Requireds:\\n"
+                        "    --aa, -a <VAL>     ... description ...\\n"
+                        "\\n"
+                        "  Optionals:\\n"
+                        "    --bb, -b <VAL>     ... description ...\\n"
+                        "\\n"
+                        "  Flags:\\n"
+                        "    --cc, -c           ... description ...\\n"
+                        "\\n"
+                        "  Positionals:\\n"
+                        "    POS0               ... description ...\\n"
+                        "    POS1               ... description ...\\n"
+                        "\\n");
+        exit(EXIT_SUCCESS);
+    }
+
+    // show how the program understood each of the user-provided arguments
+    CLA_parsed_as(cla, stdout);
+
+    // free memory resources
+    CLA_destroy(&cla);
+
+    // exit
+    return EXIT_SUCCESS;
+}
+.EE
+.PP
+Let's see how that works in practice:
+.IP
+.EX
+$ ./example-parse --help
+Usage: example-parse REQUIREDS [OPTIONALS] [FLAGS] POS0 POS1
+
+  Requireds:
+    --aa, -a <VAL>     ... description ...
+
+  Optionals:
+    --bb, -b <VAL>     ... description ...
+
+  Flags:
+    --cc, -c           ... description ...
+
+  Positionals:
+    POS0               ... description ...
+    POS1               ... description ...
+.EE
+.PP
+Note we never added a flag \fB-h\fR/\fB--help\fR, but \fBhelp_requested\fR still works as expected.
+.SH SEE ALSO
+.PP
+\fBCLA\fR(3), \fBCLA_create\fR(3), \fBCLA_parse\fR(3)
