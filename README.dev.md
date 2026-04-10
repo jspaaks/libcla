@@ -50,12 +50,12 @@ $ sudo apt install libcriterion-dev
 Run the tests with
 
 ```console
-# run only test CLA_add_optional::99
-$ ./dist/bin/test-cla -j1 --verbose --filter CLA_add_optional/99
-# run only tests from suite CLA_add_optional
-$ ./dist/bin/test-cla -j1 --verbose --filter CLA_add_optional/*
-# run only tests from suite CLA_add_optional
+# run all tests verbosely, and using one concurrent job
 $ ./dist/bin/test-cla -j1 --verbose
+# run only tests from the CLA_add_optional suite
+$ ./dist/bin/test-cla -j1 --verbose --filter CLA_add_optional/*
+# run only the test from line 99 from the CLA_add_optional suite
+$ ./dist/bin/test-cla -j1 --verbose --filter CLA_add_optional/99
 ```
 
 Or simply,
