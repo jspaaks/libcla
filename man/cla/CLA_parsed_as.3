@@ -37,7 +37,7 @@ can be constructed using
 \fBCLA_create\fR.
 .SH EXAMPLES
 .PP
-The code example below represents a program that expects exactly one (unnamed) positional argument
+The code example below represents a program that expects exactly two (unnamed) positional arguments
 and exactly one required named argument (\[dq]--aa\[dq]/\[dq]-a\[dq]); it additionally expects an
 optional named argument (\[dq]--bb\[dq]/\[dq]-b\[dq]), and an (optional) flag
 (\[dq]--cc\[dq]/\[dq]-c\[dq]). The program prints its interpretation of each argument that the user
@@ -131,7 +131,7 @@ positional pos0
 positional pos1
 .EE
 .PP
-It works! But we haven't tried with the optional arguments yet. Let's see what options we have:
+It works! But we haven't tried with the optional arguments yet. Let's see what the help says:
 .IP
 .EX
 $ ./example-parse --help
